@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сделки — мокап</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .c-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .kanban-col { display: flex; flex-direction: column; }
+  .kanban-col .cnt { float: right; }
+  .kanban-cards { flex: 1; min-height: 80px; border-radius: 8px; }
+  .kanban-cards.drop-over { outline: 2px dashed var(--primary); outline-offset: 2px; background: #e6efff; }
+  .kanban-card { cursor: grab; }
+  .kanban-card:active { cursor: grabbing; }
+  .kanban-card.dragging { opacity: .5; }
+  .kanban-card .amount { font-weight: 700; margin: 6px 0 2px; }
+  .kanban-card .next { font-size: 12px; margin-top: 6px; padding: 5px 8px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; color: #92400e; }
+  .sum { cursor: pointer; }
+  .sum.on { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+  .sum .num { font-size: 24px; font-weight: 700; }
+  .sum .lbl { color: var(--muted); font-size: 12px; margin-top: 3px; }
+  .err { color: var(--danger); font-size: 12px; margin-top: 4px; display: none; }
+  .ord-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .ord-row:last-child { border-bottom: none; }
+</style>
+</head>
+<body>
+<div class="mock-note">
+  <a href="index.html">← Все мокапы</a>
+  <span>Шаг 2: коммерческая договорённость · Экран «Сделки» (kanban, drag-and-drop) · Роль: MANAGER · Демо-данные, интерактивный mockup (JS)</span>
+</div>
+<input class="navtoggle" id="navtoggle" type="checkbox">
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">Gavan CRM <label class="side-close" for="navtoggle" title="Свернуть меню">«</label></div>
+    <nav>
+      <a href="index.html">← Схема процесса</a>
+      <a href="login.html">Вход</a>
+      <a href="dashboard.html">Дашборд</a>
+      <a href="clients.html">Клиенты</a>
+      <a href="leads.html">Заявки</a>
+      <a href="deals.html" class="active">Сделки</a>
+      <a href="orders.html">Заказы</a>
+      <a href="order-assign.html">Заказ: назначение</a>
+      <a href="order-work.html">Заказ: уборка</a>
+      <a href="order-quality.html">Заказ: проверка</a>
+      <a href="calendar.html">Календарь</a>
+      <a href="scan.html">QR-скан</a>
+      <a href="client-cabinet.html">Кабинет клиента</a>
+      <a href="tasks.html">Задачи</a>
+      <a href="history.html">История</a>
+    </nav>
+    <div class="user-block">
+      <div>Елена Менеджерова</div>
+      <div style="opacity:.7">MANAGER</div>
+      <span class="btn sm" style="margin-top:8px">Выйти</span>
+    </div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <label class="btn navhide" for="navtoggle" title="Скрыть/показать меню">☰</label>
+      <strong>Гавань — клининг CRM</strong>
+      <div class="topbar-right">
+        <details class="dd">
+          <summary><span class="icon-btn">🔔<span class="n-dot">3</span></span></summary>
+          <div class="dd-menu">
+            <div class="dd-title">Уведомления</div>
+            <a href="order-quality.html">ORD-SEED-003 сдан на проверку</a>
+            <a href="deals.html">Сделка «Вектра» выиграна · 96 000 ₽</a>
+            <a href="leads.html">Новая заявка с сайта</a>
+          </div>
+        </details>
+        <details class="dd">
+          <summary>
+            <span class="avatar">ЕМ</span>
+            <span class="u-meta"><b>Елена Менеджерова</b><i>MANAGER</i></span>
+            <span style="color:var(--muted)">▾</span>
+          </summary>
+          <div class="dd-menu">
+            <a href="#">Профиль</a>
+            <a href="#">Сменить пароль</a>
+            <a href="login.html">Выйти</a>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="content">
+
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap">
+        <div>
+          <h2 style="margin-bottom:2px">Сделки</h2>
+          <p style="color:var(--muted); margin:0 0 16px; font-size:14px">Коммерческие отношения с клиентами и их текущий статус</p>
+        </div>
+        <span class="btn primary" id="btnNew">+ Новая сделка</span>
+      </div>
+
+      <div class="grid" style="grid-template-columns:repeat(4,1fr); margin-bottom:16px" id="sum">
+        <div class="card sum" data-s=""><div class="num" id="sumAll">0</div><div class="lbl">Все сделки</div></div>
+        <div class="card sum" data-s="action"><div class="num" id="sumAct">0</div><div class="lbl">Требуют действия</div></div>
+        <div class="card sum" data-s="in_progress"><div class="num" id="sumWork">0</div><div class="lbl">В работе</div></div>
+        <div class="card sum" data-s="completed"><div class="num" id="sumDone">0</div><div class="lbl">Завершены</div></div>
+      </div>
+
+      <div class="toolbar">
+        <input class="input" id="q" style="max-width:320px" placeholder="Поиск по клиенту, сделке или объекту…">
+        <select class="input" id="fStage" style="max-width:160px">
+          <option value="">Стадия: все</option>
+          <option value="new">Новые</option><option value="negotiation">Переговоры</option>
+          <option value="approval">Согласование</option><option value="in_progress">В работе</option>
+          <option value="completed">Завершены</option><option value="lost">Потеряны</option>
+        </select>
+        <select class="input" id="fManager" style="max-width:170px">
+          <option value="">Все менеджеры</option><option>Алексей Смирнов</option><option>Мария Ким</option>
+        </select>
+        <select class="input" id="fType" style="max-width:140px">
+          <option value="">Тип: все</option><option value="INDIVIDUAL">Частные</option><option value="BUSINESS">Бизнес</option>
+        </select>
+        <span class="btn" id="btnReset">Сбросить</span>
+      </div>
+
+      <div class="kanban" id="board"></div>
+      <div id="empty" class="card empty" style="display:none">
+        <b>Сделки не найдены</b>
+        <p style="color:var(--muted)">Попробуйте изменить параметры поиска или фильтров.</p>
+        <span class="btn" id="btnReset2">Сбросить фильтры</span>
+      </div>
+      <div id="lostWrap" style="display:none">
+        <h4 style="color:var(--muted)">Потерянные сделки</h4>
+        <div id="lostList"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="drawer-backdrop" id="backdrop"></div>
+<aside class="drawer" id="drawer"></aside>
+
+<div class="modal-backdrop" id="modalLost" style="display:none">
+  <div class="modal">
+    <h3>Потерять сделку</h3>
+    <label class="field"><span>Причина *</span>
+      <select class="input" id="lostReason">
+        <option value="">— выберите —</option>
+        <option value="PRICE">Цена</option>
+        <option value="COMPETITOR">Выбрали другую компанию</option>
+        <option value="NEEDS">Изменились потребности</option>
+        <option value="NO_DEAL">Не удалось договориться</option>
+        <option value="OTHER">Другое</option>
+      </select>
+      <div class="err" id="eReason">Укажите причину</div>
+    </label>
+    <div class="actions">
+      <span class="btn" onclick="closeLost()">Отмена</span>
+      <span class="btn danger" id="btnLostSave">Потерять сделку</span>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalDone" style="display:none">
+  <div class="modal">
+    <h3>Завершить сделку?</h3>
+    <p style="color:var(--muted); font-size:14px" id="doneText"></p>
+    <div class="actions">
+      <span class="btn" onclick="closeDone()">Отмена</span>
+      <span class="btn primary" id="btnDoneOk">Завершить</span>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalNew" style="display:none">
+  <div class="modal">
+    <h3>Новая сделка</h3>
+    <label class="field"><span>Клиент *</span>
+      <select class="input" id="nClient"><option value="">— выберите —</option></select>
+      <div class="err" id="eClient">Выберите клиента</div>
+    </label>
+    <label class="field"><span>Название</span><input class="input" id="nTitle" placeholder="Регулярное обслуживание ООО «…»"></label>
+    <label class="field"><span>Услуга</span><input class="input" id="nService" placeholder="Регулярная уборка"></label>
+    <div style="display:flex; gap:10px">
+      <label class="field" style="flex:1"><span>Стоимость, ₽</span><input class="input" id="nAmount" type="number" min="0"></label>
+      <label class="field" style="flex:1"><span>Период</span>
+        <select class="input" id="nPeriod"><option value="/ месяц">/ месяц</option><option value="">разово</option></select></label>
+    </div>
+    <div style="display:flex; gap:10px">
+      <label class="field" style="flex:1"><span>Дата начала</span><input class="input" id="nStart" type="date"></label>
+      <label class="field" style="flex:1"><span>Периодичность</span><input class="input" id="nFreq" placeholder="3 раза в неделю"></label>
+    </div>
+    <label class="field"><span>Менеджер</span>
+      <select class="input" id="nManager"><option value="">—</option><option>Алексей Смирнов</option><option>Мария Ким</option></select>
+    </label>
+    <label class="field"><span>Условия</span><textarea class="input" id="nCond" rows="2"></textarea></label>
+    <label class="field"><span>Объекты</span></label>
+    <div id="nObjects" style="border:1px solid var(--border); border-radius:8px; padding:8px 10px; max-height:120px; overflow:auto; font-size:13px"></div>
+    <div class="actions">
+      <span class="btn" onclick="closeNew()">Отмена</span>
+      <span class="btn primary" id="btnCreate">Создать сделку</span>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+const STAGES = { new:['Новая','blue'], negotiation:['Переговоры','amber'], approval:['Согласование','purple'], in_progress:['В работе','green'], completed:['Завершена','gray'], lost:['Потеряна','red'] };
+const COLS = [['new','Новые'],['negotiation','Переговоры'],['approval','Согласование'],['in_progress','В работе'],['completed','Завершены']];
+const REASONS = { PRICE:'Цена', COMPETITOR:'Выбрали другую компанию', NEEDS:'Изменились потребности', NO_DEAL:'Не удалось договориться', OTHER:'Другое' };
+const O_ST = { 'Запланирован':'blue','В работе':'amber','Выполнен':'green','Отменён':'gray' };
+const MANAGERS = ['Алексей Смирнов','Мария Ким'];
+
+const CLIENTS = [
+ {id:'cl1',name:'Анна Петрова',type:'INDIVIDUAL'},
+ {id:'cl2',name:'ООО «Меридиан»',type:'BUSINESS'},
+ {id:'cl4',name:'ТОО «Новая Линия»',type:'BUSINESS'},
+ {id:'cl5',name:'ООО «Вектор»',type:'BUSINESS'},
+ {id:'cl6',name:'ТОО «Альфа Сервис»',type:'BUSINESS'},
+ {id:'cl7',name:'БЦ «Орбита»',type:'BUSINESS'},
+ {id:'cl8',name:'Елена Морозова',type:'INDIVIDUAL'},
+ {id:'cl9',name:'ООО «Стандарт»',type:'BUSINESS'},
+ {id:'cl10',name:'ООО «Горизонт»',type:'BUSINESS'},
+ {id:'cl11',name:'Сергей Волков',type:'INDIVIDUAL'},
+ {id:'cl15',name:'ИП «Северный ветер»',type:'BUSINESS'},
+ {id:'cl16',name:'ЖК «Солнечный» (ТСЖ)',type:'BUSINESS'},
+ {id:'cl17',name:'Кофейня «Бариста»',type:'BUSINESS'},
+ {id:'cl18',name:'Ресторан «Лагуна»',type:'BUSINESS'},
+ {id:'cl19',name:'ООО «Вектра»',type:'BUSINESS'},
+];
+const OBJECTS = [
+ {id:'o1',name:'Квартира клиента',area:'78 м²'},
+ {id:'o2',name:'Офис «Меридиан»',area:'420 м²'},
+ {id:'o4',name:'Складской комплекс',area:'2 100 м²'},
+ {id:'o5',name:'Бизнес-центр «Вектор»',area:'800 м²'},
+ {id:'o6',name:'Склад «Вектор»',area:'4 800 м²'},
+ {id:'o7',name:'Производственный корпус',area:'3 400 м²'},
+ {id:'o8',name:'Склад «Альфа»',area:'900 м²'},
+ {id:'o9',name:'Бизнес-центр «Орбита»',area:'2 600 м²'},
+ {id:'o10',name:'Частный дом',area:'210 м²'},
+ {id:'o11',name:'Офис «Стандарт»',area:'380 м²'},
+ {id:'o13',name:'Производственный корпус «Горизонт»',area:'5 000 м²'},
+ {id:'o14',name:'Частный дом',area:'160 м²'},
+ {id:'o18',name:'Сеть офисов «Северный ветер»',area:'1 100 м²'},
+ {id:'o19',name:'Подъезды ЖК «Солнечный»',area:'2 300 м²'},
+ {id:'o20',name:'Зал кофейни «Бариста»',area:'120 м²'},
+ {id:'o21',name:'Зал ресторана «Лагуна»',area:'340 м²'},
+ {id:'o22',name:'Склад «Вектра»',area:'2 000 м²'},
+];
+const clientById=id=>CLIENTS.find(c=>c.id===id);
+const objById=id=>OBJECTS.find(o=>o.id===id);
+const now=()=>{const d=new Date();return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;};
+const H=(at,who,text)=>({at,who,text});
+const money=n=>n?n.toLocaleString('ru-RU')+' ₽':'—';
+
+let ordersSeq = 504;
+const deals = [
+ {id:303,title:'Комплексное обслуживание производства',clientId:'cl6',applicationId:1047,managerId:'Мария Ким',objectIds:['o7','o8'],status:'new',service:'Комплексное обслуживание',amount:480000,amountPeriod:'/ месяц',startDate:'15.10.2026',frequency:'ежедневно',conditions:'Производственный корпус + склад',nextAction:'Созвониться по тендеру',nextActionDate:'завтра',createdAt:'05.10.2026',orders:[],history:[H('05.10.2026 09:00','Система','Сделка создана из заявки #1047')]},
+ {id:302,title:'Регулярное обслуживание ООО «Вектор»',clientId:'cl5',applicationId:1048,managerId:'Алексей Смирнов',objectIds:['o5','o6'],status:'in_progress',service:'Регулярная уборка',amount:215000,amountPeriod:'/ месяц',startDate:'01.11.2026',frequency:'3 раза в неделю',conditions:'Регулярное обслуживание офиса и склада',nextAction:'Подтвердить дату начала',nextActionDate:'сегодня',createdAt:'25.10.2026',
+  orders:[{num:501,date:'01.11.2026',service:'Уборка БЦ',status:'Выполнен'},{num:502,date:'03.11.2026',service:'Уборка склада',status:'В работе'},{num:503,date:'05.11.2026',service:'Уборка БЦ',status:'Запланирован'}],
+  history:[H('30.10.2026 14:08','Система','Заявка #1048 одобрена'),H('30.10.2026 14:10','Система','Сделка создана из заявки #1048'),H('31.10.2026 16:20','Алексей Смирнов','Создан заказ #501'),H('01.11.2026 10:30','Алексей Смирнов','Сделка переведена в «В работе»')]},
+ {id:301,title:'Регулярная уборка офиса',clientId:'cl9',applicationId:1044,managerId:'Алексей Смирнов',objectIds:['o11'],status:'in_progress',service:'Регулярная уборка',amount:120000,amountPeriod:'/ месяц',startDate:'10.10.2026',frequency:'2 раза в неделю',conditions:'Офис «Стандарт»',nextAction:'Создать следующий заказ',nextActionDate:'08.10.2026',createdAt:'01.10.2026',orders:[{num:498,date:'10.10.2026',service:'Уборка офиса',status:'Запланирован'}],
+  history:[H('01.10.2026 11:00','Система','Сделка создана из заявки #1044'),H('02.10.2026 09:00','Алексей Смирнов','Сделка переведена в «В работе»')]},
+ {id:300,title:'Регулярная уборка производства',clientId:'cl10',applicationId:1042,managerId:'Алексей Смирнов',objectIds:['o13'],status:'approval',service:'Регулярная уборка',amount:340000,amountPeriod:'/ месяц',startDate:'01.11.2026',frequency:'ежедневно',conditions:'Производственный корпус «Горизонт»',nextAction:'Подписать договор',nextActionDate:'09.10.2026',createdAt:'30.09.2026',orders:[],history:[H('30.09.2026 10:00','Система','Сделка создана из заявки #1042')]},
+ {id:299,title:'Генеральная уборка квартиры',clientId:'cl1',applicationId:1043,managerId:'Мария Ким',objectIds:['o1'],status:'completed',service:'Генеральная уборка',amount:18000,amountPeriod:'',startDate:'30.09.2026',frequency:'разово',conditions:'После ремонта',createdAt:'29.09.2026',orders:[{num:490,date:'30.09.2026',service:'Генеральная уборка',status:'Выполнен'}],
+  history:[H('29.09.2026 12:00','Система','Сделка создана из заявки #1043'),H('30.09.2026 18:00','Мария Ким','Сделка завершена')]},
+ {id:298,title:'Уборка дома и мойка окон',clientId:'cl11',applicationId:1041,managerId:'Мария Ким',objectIds:['o14'],status:'completed',service:'Генеральная уборка + окна',amount:24000,amountPeriod:'',startDate:'29.09.2026',frequency:'разово',createdAt:'28.09.2026',orders:[{num:489,date:'29.09.2026',service:'Уборка дома',status:'Выполнен'}],
+  history:[H('28.09.2026 10:00','Система','Сделка создана из заявки #1041'),H('29.09.2026 17:30','Мария Ким','Сделка завершена')]},
+ {id:297,title:'Ежедневная уборка БЦ «Орбита»',clientId:'cl7',applicationId:1046,managerId:'Алексей Смирнов',objectIds:['o9'],status:'negotiation',service:'Регулярная уборка',amount:390000,amountPeriod:'/ месяц',startDate:'',frequency:'ежедневно',conditions:'По ночам, 6 дней в неделю',nextAction:'Согласовать график',nextActionDate:'завтра',createdAt:'02.10.2026',orders:[],history:[H('02.10.2026 13:00','Система','Сделка создана из заявки #1046')]},
+ {id:296,title:'Уборка дома перед заселением',clientId:'cl8',applicationId:1045,managerId:'Мария Ким',objectIds:['o10'],status:'negotiation',service:'Генеральная уборка',amount:32000,amountPeriod:'',startDate:'',frequency:'разово',nextAction:'Позвонить клиенту',nextActionDate:'сегодня',createdAt:'02.10.2026',orders:[],history:[H('02.10.2026 15:00','Система','Сделка создана из заявки #1045')]},
+ {id:295,title:'Обслуживание склада',clientId:'cl4',applicationId:1052,managerId:'',objectIds:['o4'],status:'new',service:'Регулярная уборка',amount:95000,amountPeriod:'/ месяц',frequency:'2 раза в неделю',nextAction:'Назначить менеджера',nextActionDate:'сегодня',createdAt:'06.10.2026',orders:[],history:[H('06.10.2026 08:40','Система','Сделка создана из заявки #1052')]},
+ {id:294,title:'Уборка офиса «Меридиан»',clientId:'cl2',managerId:'Алексей Смирнов',objectIds:['o2'],status:'approval',service:'Регулярная уборка',amount:140000,amountPeriod:'/ месяц',startDate:'20.10.2026',frequency:'3 раза в неделю',nextAction:'Ждём подпись клиента',nextActionDate:'10.10.2026',createdAt:'03.10.2026',orders:[],history:[H('03.10.2026 12:00','Мария Ким','Сделка создана вручную')]},
+ {id:293,title:'Сеть офисов «Северный ветер»',clientId:'cl15',managerId:'Мария Ким',objectIds:['o18'],status:'in_progress',service:'Регулярная уборка',amount:260000,amountPeriod:'/ месяц',startDate:'01.10.2026',frequency:'ежедневно',nextAction:'Создать следующий заказ',nextActionDate:'07.10.2026',createdAt:'20.09.2026',orders:[{num:495,date:'05.10.2026',service:'Уборка офисов',status:'Выполнен'}],history:[H('20.09.2026 10:00','Система','Сделка создана из заявки #1036')]},
+ {id:292,title:'Уборка подъездов ЖК',clientId:'cl16',managerId:'Мария Ким',objectIds:['o19'],status:'in_progress',service:'Поддерживающая уборка',amount:180000,amountPeriod:'/ месяц',startDate:'15.09.2026',frequency:'5 раз в неделю',createdAt:'10.09.2026',orders:[{num:480,date:'04.10.2026',service:'Уборка подъездов',status:'В работе'}],history:[H('10.09.2026 09:00','Система','Сделка создана из заявки #1030')]},
+ {id:291,title:'Ежедневная уборка кофейни',clientId:'cl17',managerId:'Мария Ким',objectIds:['o20'],status:'negotiation',service:'Регулярная уборка',amount:75000,amountPeriod:'/ месяц',frequency:'ежедневно, утро',nextAction:'Отправить КП',nextActionDate:'сегодня',createdAt:'05.10.2026',orders:[],history:[H('05.10.2026 11:00','Система','Сделка создана из заявки #1050')]},
+ {id:290,title:'Уборка после ремонта',clientId:'cl18',managerId:'Алексей Смирнов',objectIds:['o21'],status:'lost',service:'Генеральная уборка',amount:90000,amountPeriod:'',lostReason:'COMPETITOR',createdAt:'22.09.2026',orders:[],history:[H('22.09.2026 10:00','Система','Сделка создана'),H('28.09.2026 14:00','Алексей Смирнов','Сделка потеряна. Причина: Выбрали другую компанию')]},
+ {id:289,title:'Уборка склада «Вектра»',clientId:'cl19',managerId:'Алексей Смирнов',objectIds:['o22'],status:'approval',service:'Генеральная уборка склада',amount:96000,amountPeriod:'',startDate:'12.10.2026',frequency:'разово',nextAction:'Согласовать дату выезда',nextActionDate:'завтра',createdAt:'04.10.2026',orders:[],history:[H('04.10.2026 16:00','Система','Сделка создана из заявки #1049')]},
+];
+
+const clientEvent = (deal,text)=>{try{
+  const ev=JSON.parse(localStorage.getItem('gavan_client_events')||'[]');
+  ev.push({name:clientById(deal.clientId).name, at:now(), action:text});
+  localStorage.setItem('gavan_client_events',JSON.stringify(ev));}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const badge=(t,cls)=>`<span class="badge ${cls}">${t}</span>`;
+
+const board=document.getElementById('board'), empty=document.getElementById('empty'), lostWrap=document.getElementById('lostWrap'), lostList=document.getElementById('lostList');
+const q=document.getElementById('q'), fStage=document.getElementById('fStage'), fManager=document.getElementById('fManager'), fType=document.getElementById('fType');
+let sumMode='';
+
+function filtered(){
+  const s=q.value.trim().toLowerCase();
+  return deals.filter(d=>{
+    const cl=clientById(d.clientId);
+    const objs=d.objectIds.map(o=>objById(o).name).join(' ');
+    const hay=[d.id,d.title,d.service,cl.name,objs].join(' ').toLowerCase();
+    return (!s||hay.includes(s))
+      &&(!fManager.value||d.managerId===fManager.value)
+      &&(!fType.value||cl.type===fType.value)
+      &&(!fStage.value||d.status===fStage.value)
+      &&(sumMode!=='action'||d.nextAction);
+  });
+}
+function summary(){
+  sumAll.textContent=deals.length;
+  sumAct.textContent=deals.filter(d=>d.nextAction&&d.status!=='completed'&&d.status!=='lost').length;
+  sumWork.textContent=deals.filter(d=>d.status==='in_progress').length;
+  sumDone.textContent=deals.filter(d=>d.status==='completed').length;
+  document.querySelectorAll('#sum .sum').forEach(el=>el.classList.toggle('on',sumMode===el.dataset.s||(sumMode===''&&el.dataset.s==='')));
+}
+const card=d=>{
+  const cl=clientById(d.clientId);
+  const objs=d.objectIds.map(o=>objById(o).name);
+  return `<div class="kanban-card" draggable="true" data-id="${d.id}">
+    <div style="display:flex;justify-content:space-between"><b>#${d.id}</b><span class="c-sub">${d.createdAt}</span></div>
+    <div style="font-weight:600;margin-top:2px">${esc(d.title)}</div>
+    <div class="c-sub">${esc(cl.name)}</div>
+    ${objs.length?`<div class="c-sub">${esc(objs[0])}${objs.length>1?` + ${objs.length-1} объект`:''}</div>`:''}
+    <div class="amount">${money(d.amount)}${d.amountPeriod||''}</div>
+    <div class="c-sub">${d.managerId||'Менеджер не назначен'} · Заказы: ${d.orders.length}</div>
+    ${d.nextAction?`<div class="next">→ ${esc(d.nextAction)}<span style="float:right">${esc(d.nextActionDate||'')}</span></div>`:''}
+    ${d.status==='lost'?`<div class="next" style="background:#fef2f2;border-color:#fca5a5;color:#991b1b">Причина: ${REASONS[d.lostReason]||''}</div>`:''}
+  </div>`;
+};
+function render(){
+  summary();
+  const rows=filtered();
+  const lostFilter=fStage.value==='lost';
+  empty.style.display=rows.length?'none':'';
+  board.style.display=(!rows.length||lostFilter)?'none':'flex';
+  lostWrap.style.display=lostFilter?'':'none';
+  if(!lostFilter){
+    board.innerHTML=COLS.map(([st,title])=>{
+      const items=rows.filter(d=>d.status===st);
+      return `<div class="kanban-col"><h4>${title} <span class="cnt">${items.length}</span></h4>
+        <div class="kanban-cards" data-s="${st}">${items.map(card).join('')||'<div class="c-sub" style="text-align:center;padding:12px 4px">Нет сделок</div>'}</div></div>`;
+    }).join('');
+  } else {
+    lostList.innerHTML=rows.map(card).join('')||'<div class="card c-sub">Нет потерянных сделок</div>';
+  }
+}
+function resetFilters(){q.value='';fStage.value='';fManager.value='';fType.value='';sumMode='';render();}
+[q,fStage,fManager,fType].forEach(el=>{el.addEventListener('input',render);el.addEventListener('change',render);});
+btnReset.onclick=resetFilters; btnReset2.onclick=resetFilters;
+document.getElementById('sum').addEventListener('click',e=>{
+  const c=e.target.closest('.sum'); if(!c) return;
+  sumMode=sumMode===c.dataset.s?'':c.dataset.s;
+  fStage.value = (sumMode&&sumMode!=='action')?sumMode:'';
+  render();
+});
+
+/* Drag & drop */
+let dragId=null,suppressClick=false;
+board.addEventListener('dragstart',e=>{
+  const c=e.target.closest('.kanban-card'); if(!c) return;
+  dragId=+c.dataset.id; suppressClick=true; e.dataTransfer.effectAllowed='move';
+  requestAnimationFrame(()=>c.classList.add('dragging'));
+});
+board.addEventListener('dragend',e=>{
+  e.target.closest('.kanban-card')?.classList.remove('dragging');
+  document.querySelectorAll('.kanban-cards.drop-over').forEach(x=>x.classList.remove('drop-over'));
+  setTimeout(()=>suppressClick=false,0);
+});
+board.addEventListener('dragover',e=>{
+  const zone=e.target.closest('.kanban-cards'); if(!zone) return;
+  e.preventDefault(); e.dataTransfer.dropEffect='move';
+  document.querySelectorAll('.kanban-cards.drop-over').forEach(x=>{if(x!==zone)x.classList.remove('drop-over');});
+  zone.classList.add('drop-over');
+});
+board.addEventListener('dragleave',e=>{
+  const zone=e.target.closest('.kanban-cards');
+  if(zone&&!zone.contains(e.relatedTarget)) zone.classList.remove('drop-over');
+});
+board.addEventListener('drop',e=>{
+  const zone=e.target.closest('.kanban-cards'); if(!zone||dragId==null) return;
+  e.preventDefault(); zone.classList.remove('drop-over');
+  const d=deals.find(x=>x.id===dragId); dragId=null;
+  const ns=zone.dataset.s; if(!d||ns===d.status) return;
+  setStage(d,ns);
+});
+board.addEventListener('click',e=>{
+  if(suppressClick) return;
+  const c=e.target.closest('.kanban-card'); if(!c) return;
+  openDrawer(deals.find(d=>d.id===+c.dataset.id));
+});
+lostList.addEventListener('click',e=>{
+  const c=e.target.closest('.kanban-card'); if(!c) return;
+  openDrawer(deals.find(d=>d.id===+c.dataset.id));
+});
+
+function setStage(d,ns,who='Елена Менеджерова'){
+  if(ns==='lost'){ openLost(d); return; }
+  if(ns==='completed'){ openDone(d); return; }
+  d.history.push(H(now(),who,`Сделка переведена в «${STAGES[ns][0]}»`));
+  clientEvent(d,`Сделка #${d.id} переведена в «${STAGES[ns][0]}»`);
+  d.status=ns; render();
+  if(cur===d) openDrawer(d);
+}
+
+/* Drawer */
+const drawer=document.getElementById('drawer'), backdrop=document.getElementById('backdrop');
+let cur=null;
+function closeDrawer(){drawer.classList.remove('open');backdrop.classList.remove('open');cur=null;}
+backdrop.onclick=closeDrawer;
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeLost();closeDone();closeNew();}});
+
+function openDrawer(d){
+  cur=d;
+  const cl=clientById(d.clientId);
+  const active=!['completed','lost'].includes(d.status);
+  drawer.innerHTML=`
+   <div class="card">
+    <div class="drawer-head">
+      <div>
+        <div style="font-size:18px;font-weight:700">Сделка #${d.id} ${badge(...STAGES[d.status])}</div>
+        <div style="margin-top:4px;font-weight:600">${esc(d.title)}</div>
+        <div class="c-sub">${esc(cl.name)}</div>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    ${active?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+      <span class="btn sm" id="dDone">Завершить сделку</span>
+      <span class="btn sm" id="dLose" style="color:var(--danger)">Потерять сделку</span>
+      <button class="btn sm" onclick="toast('Редактирование — в разработке')">⋯</button>
+    </div>`:''}
+   </div>
+
+   <div class="card" style="margin-top:12px"><b>Основная информация</b>
+     <div class="kv" style="margin-top:8px"><b>Клиент:</b> <a href="clients.html">${esc(cl.name)}</a></div>
+     ${d.applicationId?`<div class="kv"><b>Источник:</b> создана из <a href="leads.html">заявки #${d.applicationId}</a></div>`:''}
+     <div class="kv"><b>Менеджер:</b> ${d.managerId||'—'}</div>
+     <div class="kv"><b>Дата создания:</b> ${d.createdAt}</div>
+     ${d.nextAction?`<div class="kv"><b>Следующее действие:</b> ${esc(d.nextAction)} <span class="c-sub">${esc(d.nextActionDate||'')}</span></div>`:''}
+     ${d.status==='lost'?`<div class="kv"><b>Причина потери:</b> ${REASONS[d.lostReason]||'—'}</div>`:''}
+   </div>
+
+   <div class="card" style="margin-top:12px"><b>Условия сделки</b>
+     <div class="kv" style="margin-top:8px"><b>Услуга:</b> ${esc(d.service||'—')}</div>
+     <div class="kv"><b>Периодичность:</b> ${esc(d.frequency||'—')}</div>
+     <div class="kv"><b>Стоимость:</b> ${money(d.amount)}${d.amountPeriod||''}</div>
+     <div class="kv"><b>Дата начала:</b> ${d.startDate||'—'}</div>
+     ${d.conditions?`<div class="kv"><b>Условия:</b> ${esc(d.conditions)}</div>`:''}
+   </div>
+
+   <div class="card" style="margin-top:12px"><b>Объекты</b>
+     ${d.objectIds.map(oid=>{const o=objById(oid);return `<div class="mini-card"><b>${esc(o.name)}</b><div class="sub">${esc(o.area)}</div></div>`;}).join('')||'<span class="c-sub">Нет объектов</span>'}
+   </div>
+
+   <div class="card" style="margin-top:12px">
+     <div style="display:flex;justify-content:space-between;align-items:center"><b>Заказы</b>
+       ${active?'<span class="btn sm primary" id="dNewOrder">+ Новый заказ</span>':''}</div>
+     <div style="margin-top:8px">
+       ${d.orders.slice().reverse().map(o=>`<div class="ord-row"><span><b>Заказ #${o.num}</b> · ${esc(o.service)}<div class="c-sub">${o.date}</div></span>${badge(o.status,O_ST[o.status])}</div>`).join('')||'<span class="c-sub">Заказов пока нет</span>'}
+     </div>
+   </div>
+
+   <div class="card" style="margin-top:12px">
+     <label class="field" style="margin-bottom:0"><span>Стадия</span>
+       <select class="input" id="dStage">
+         ${Object.entries(STAGES).map(([k,[t]])=>`<option value="${k}" ${d.status===k?'selected':''}>${t}</option>`).join('')}
+       </select></label>
+   </div>
+
+   <div class="card" style="margin-top:12px"><b>История</b>
+     ${d.history.slice().reverse().map(h=>`<div class="hist-item"><span class="when">${h.at}</span><span><b>${esc(h.text)}</b><div class="c-sub">${esc(h.who)}</div></span></div>`).join('')}
+   </div>`;
+  drawer.classList.add('open'); backdrop.classList.add('open');
+
+  document.getElementById('dStage').onchange=e=>{
+    const ns=e.target.value; if(ns===d.status) return;
+    if(ns==='lost'||ns==='completed'){ e.target.value=d.status; setStage(d,ns); return; }
+    setStage(d,ns);
+  };
+  document.getElementById('dDone')?.addEventListener('click',()=>openDone(d));
+  document.getElementById('dLose')?.addEventListener('click',()=>openLost(d));
+  document.getElementById('dNewOrder')?.addEventListener('click',()=>{
+    const num=ordersSeq++;
+    d.orders.push({num,date:now().slice(0,10),service:d.service||'Уборка',status:'Запланирован'});
+    d.history.push(H(now(),'Елена Менеджерова',`Создан заказ #${num}`));
+    clientEvent(d,`Создан заказ #${num} по сделке #${d.id}`);
+    toast(`Заказ #${num} создан и привязан к сделке`);
+    render(); openDrawer(d);
+  });
+}
+
+/* Lost / Done modals */
+const modalLost=document.getElementById('modalLost'), modalDone=document.getElementById('modalDone');
+let lostTarget=null, doneTarget=null;
+function openLost(d){lostTarget=d;lostReason.value='';eReason.style.display='none';modalLost.style.display='flex';}
+function closeLost(){modalLost.style.display='none';lostTarget=null;}
+modalLost.addEventListener('click',e=>{if(e.target===modalLost)closeLost();});
+btnLostSave.onclick=()=>{
+  const r=lostReason.value; if(!r){eReason.style.display='block';return;}
+  const d=lostTarget;
+  d.status='lost'; d.lostReason=r;
+  d.history.push(H(now(),'Елена Менеджерова',`Сделка потеряна. Причина: ${REASONS[r]}`));
+  clientEvent(d,`Сделка #${d.id} потеряна. Причина: ${REASONS[r]}`);
+  closeLost(); render(); if(cur===d)openDrawer(d);
+};
+function openDone(d){doneTarget=d;document.getElementById('doneText').textContent=`Сделка #${d.id} · ${clientById(d.clientId).name} · ${money(d.amount)}${d.amountPeriod||''}. Связанные заказы сохранятся.`;modalDone.style.display='flex';}
+function closeDone(){modalDone.style.display='none';doneTarget=null;}
+modalDone.addEventListener('click',e=>{if(e.target===modalDone)closeDone();});
+btnDoneOk.onclick=()=>{
+  const d=doneTarget;
+  d.status='completed';
+  d.history.push(H(now(),'Елена Менеджерова','Сделка завершена'));
+  clientEvent(d,`Сделка #${d.id} завершена`);
+  closeDone(); render(); if(cur===d)openDrawer(d);
+  toast(`Сделка #${d.id} завершена`);
+};
+
+/* New deal modal */
+const modalNew=document.getElementById('modalNew');
+function openNew(pref){
+  document.getElementById('nClient').innerHTML='<option value="">— выберите —</option>'+CLIENTS.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  document.getElementById('nObjects').innerHTML=OBJECTS.map(o=>`<label style="display:flex;gap:8px;padding:3px 0"><input type="checkbox" value="${o.id}"> ${esc(o.name)} <span class="c-sub">${esc(o.area)}</span></label>`).join('');
+  ['nClient','nTitle','nService','nAmount','nStart','nFreq','nManager','nCond'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('nPeriod').value='/ месяц';
+  document.getElementById('eClient').style.display='none';
+  if(pref&&pref.clientId) document.getElementById('nClient').value=pref.clientId;
+  if(pref&&pref.title) document.getElementById('nTitle').value=pref.title;
+  modalNew.style.display='flex';
+}
+function closeNew(){modalNew.style.display='none';}
+document.getElementById('btnNew').onclick=()=>openNew();
+modalNew.addEventListener('click',e=>{if(e.target===modalNew)closeNew();});
+document.getElementById('btnCreate').onclick=()=>{
+  const cid=document.getElementById('nClient').value;
+  if(!cid){document.getElementById('eClient').style.display='block';return;}
+  const id=Math.max(...deals.map(d=>d.id))+1;
+  const cl=clientById(cid);
+  const d={id, title:document.getElementById('nTitle').value.trim()||`Сделка · ${cl.name}`,
+    clientId:cid, applicationId:window._fromApp||undefined,
+    managerId:document.getElementById('nManager').value,
+    objectIds:[...document.querySelectorAll('#nObjects input:checked')].map(i=>i.value),
+    status:'new', service:document.getElementById('nService').value.trim(),
+    amount:+document.getElementById('nAmount').value||0,
+    amountPeriod:document.getElementById('nPeriod').value,
+    startDate:document.getElementById('nStart').value, frequency:document.getElementById('nFreq').value.trim(),
+    conditions:document.getElementById('nCond').value.trim(), createdAt:now().slice(0,10), orders:[],
+    history:[H(now(),'Елена Менеджерова', window._fromApp?`Сделка создана из заявки #${window._fromApp}`:'Сделка создана вручную')]};
+  deals.unshift(d);
+  clientEvent(d,`Создана сделка #${id}${window._fromApp?` из заявки #${window._fromApp}`:''}`);
+  window._fromApp=null;
+  closeNew(); render(); toast(`Сделка #${id} создана`);
+};
+
+function toast(msg,err){
+  const t=document.createElement('div'); t.className='toast';
+  if(err)t.style.background='var(--danger)';
+  t.textContent=msg; document.getElementById('toasts').appendChild(t);
+  setTimeout(()=>t.remove(),2600);
+}
+
+/* Демо-путь: заявка → сделка (leads.html «Создать сделку» → deals.html?from=1048) */
+const fromApp=new URLSearchParams(location.search).get('from');
+if(fromApp){
+  const appMap={'1048':'cl5','1049':'cl1','1050':'cl2','1051':'cl3','1052':'cl4','1047':'cl6','1046':'cl7','1045':'cl8'};
+  if(!deals.some(d=>d.applicationId===+fromApp)){
+    window._fromApp=+fromApp;
+    openNew({clientId:appMap[fromApp],title:`Сделка из заявки #${fromApp}`});
+    toast(`Создаём сделку из заявки #${fromApp}`);
+  }
+}
+render();
+</script>
+</body>
+</html>

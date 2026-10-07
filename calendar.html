@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Календарь — мокап</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="mock-note">
+  <a href="index.html">← Все мокапы</a>
+  <span>Экран: Календарь (неделя) · Роль: OPERATOR · Демо-данные</span>
+</div>
+<input class="navtoggle" id="navtoggle" type="checkbox">
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">Gavan CRM <label class="side-close" for="navtoggle" title="Свернуть меню">«</label></div>
+    <nav>
+      <a href="index.html">← Схема процесса</a>
+      <a href="login.html">Вход</a>
+      <a href="dashboard.html">Дашборд</a>
+      <a href="clients.html">Клиенты</a>
+      <a href="leads.html">Заявки</a>
+      <a href="deals.html">Сделки</a>
+      <a href="orders.html">Заказы</a>
+      <a href="order-assign.html">Заказ: назначение</a>
+      <a href="order-work.html">Заказ: уборка</a>
+      <a href="order-quality.html">Заказ: проверка</a>
+      <a href="calendar.html" class="active">Календарь</a>
+      <a href="scan.html">QR-скан</a>
+      <a href="client-cabinet.html">Кабинет клиента</a>
+      <a href="tasks.html">Задачи</a>
+      <a href="history.html">История</a>
+    </nav>
+    <div class="user-block">
+      <div>Олег Операторов</div>
+      <div style="opacity:.7">OPERATOR</div>
+      <span class="btn sm" style="margin-top:8px">Выйти</span>
+    </div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <label class="btn navhide" for="navtoggle" title="Скрыть/показать меню">☰</label>
+      <strong>Гавань — клининг CRM</strong>
+      <div class="topbar-right">
+        <details class="dd">
+          <summary><span class="icon-btn">🔔<span class="n-dot">3</span></span></summary>
+          <div class="dd-menu">
+            <div class="dd-title">Уведомления</div>
+            <a href="order-quality.html">ORD-SEED-003 сдан на проверку</a>
+            <a href="deals.html">Сделка «Вектра» выиграна · 96 000 ₽</a>
+            <a href="leads.html">Новый лид с сайта</a>
+          </div>
+        </details>
+        <details class="dd">
+          <summary>
+            <span class="avatar">ОО</span>
+            <span class="u-meta"><b>Олег Операторов</b><i>OPERATOR</i></span>
+            <span style="color:var(--muted)">▾</span>
+          </summary>
+          <div class="dd-menu">
+            <a href="#">Профиль</a>
+            <a href="#">Сменить пароль</a>
+            <a href="login.html">Выйти</a>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="content">
+      <h2>Календарь</h2>
+      <div class="toolbar">
+        <span class="btn">← Неделя</span>
+        <b>5–11 октября 2026</b>
+        <span class="btn">Неделя →</span>
+        <select class="input" style="max-width:200px"><option>Все исполнители</option><option>Анна Ким</option><option>Игорь Савин</option><option>Мария Ли</option><option>Бригада А</option><option>Бригада Б</option></select>
+        <select class="input" style="max-width:170px"><option>Все филиалы</option><option>Центр</option><option>Северный</option></select>
+      </div>
+      <div class="cal">
+        <div class="day"><div class="d">Пн 5</div>
+          <div class="evt done">ORD-SEED-007 · Бригада Б · 09:00<br>ООО «Ромашка»</div>
+          <div class="evt done">ORD-SEED-008 · Мария Ли · 14:00<br>кв. 12, ул. Мира 5</div>
+        </div>
+        <div class="day today"><div class="d">Вт 6 · сегодня</div>
+          <div class="evt qa">ORD-SEED-003 · Игорь Савин · 08:00<br>склад «Вектра»</div>
+          <div class="evt">ORD-SEED-001 · Бригада А · 09:00<br>БЦ «Меркурий»</div>
+          <div class="evt">ORD-SEED-002 · Анна Ким · 12:00<br>кв. 87, Ленина 10</div>
+          <div class="evt">ORD-SEED-004 · Бригада Б · 15:00<br>БЦ «Меркурий»</div>
+        </div>
+        <div class="day"><div class="d">Ср 7</div>
+          <div class="evt">ORD-SEED-009 · Бригада А · 10:00<br>кафе «Утро»</div>
+        </div>
+        <div class="day"><div class="d">Чт 8</div>
+          <div class="evt">ORD-SEED-010 · Анна Ким · 09:30<br>офис «Вектра»</div>
+          <div class="evt">ORD-SEED-011 · Игорь Савин · 13:00<br>ТСЖ «Ладога»</div>
+        </div>
+        <div class="day"><div class="d">Пт 9</div>
+          <div class="evt">ORD-SEED-012 · Бригада Б · 08:00<br>коттедж, пос. Лужки</div>
+        </div>
+        <div class="day"><div class="d">Сб 10</div>
+          <div class="evt">ORD-SEED-013 · Мария Ли · 11:00<br>химчистка диванов</div>
+        </div>
+        <div class="day"><div class="d">Вс 11</div>
+          <div style="color:var(--muted); font-size:11px">— выходной —</div>
+        </div>
+      </div>
+      <div style="margin-top:14px; font-size:12px; color:var(--muted)">
+        <span class="evt" style="padding:2px 8px">план/в работе</span>
+        <span class="evt qa" style="padding:2px 8px">проверка качества</span>
+        <span class="evt done" style="padding:2px 8px">завершён</span>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

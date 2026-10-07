@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Заказ — уборка и чек-лист · мокап</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="mock-note">
+  <a href="index.html">← Все мокапы</a>
+  <span>Шаг 5: IN_PROGRESS · стадия CLEANING, чек-лист заполняется · Роль: OPERATOR · Демо-данные</span>
+</div>
+<input class="navtoggle" id="navtoggle" type="checkbox">
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">Gavan CRM <label class="side-close" for="navtoggle" title="Свернуть меню">«</label></div>
+    <nav>
+      <a href="index.html">← Схема процесса</a>
+      <a href="login.html">Вход</a>
+      <a href="dashboard.html">Дашборд</a>
+      <a href="clients.html">Клиенты</a>
+      <a href="leads.html">Заявки</a>
+      <a href="deals.html">Сделки</a>
+      <a href="orders.html">Заказы</a>
+      <a href="order-assign.html">Заказ: назначение</a>
+      <a href="order-work.html" class="active">Заказ: уборка</a>
+      <a href="order-quality.html">Заказ: проверка</a>
+      <a href="calendar.html">Календарь</a>
+      <a href="scan.html">QR-скан</a>
+      <a href="client-cabinet.html">Кабинет клиента</a>
+      <a href="tasks.html">Задачи</a>
+      <a href="history.html">История</a>
+    </nav>
+    <div class="user-block">
+      <div>Олег Операторов</div>
+      <div style="opacity:.7">OPERATOR</div>
+      <span class="btn sm" style="margin-top:8px">Выйти</span>
+    </div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <label class="btn navhide" for="navtoggle" title="Скрыть/показать меню">☰</label>
+      <strong>Гавань — клининг CRM</strong>
+      <div class="topbar-right">
+        <details class="dd">
+          <summary><span class="icon-btn">🔔<span class="n-dot">3</span></span></summary>
+          <div class="dd-menu">
+            <div class="dd-title">Уведомления</div>
+            <a href="order-quality.html">ORD-SEED-003 сдан на проверку</a>
+            <a href="deals.html">Сделка «Вектра» выиграна · 96 000 ₽</a>
+            <a href="leads.html">Новый лид с сайта</a>
+          </div>
+        </details>
+        <details class="dd">
+          <summary>
+            <span class="avatar">ОО</span>
+            <span class="u-meta"><b>Олег Операторов</b><i>OPERATOR</i></span>
+            <span style="color:var(--muted)">▾</span>
+          </summary>
+          <div class="dd-menu">
+            <a href="#">Профиль</a>
+            <a href="#">Сменить пароль</a>
+            <a href="login.html">Выйти</a>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="content">
+      <h2>ORD-SEED-001 <span class="badge amber">IN_PROGRESS</span> <span class="badge blue">CLEANING</span></h2>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="timeline">
+          <div class="timeline-step done"><div class="dot"></div><div class="label">Создан</div><div class="at">04.10 11:30</div></div>
+          <div class="timeline-step done"><div class="dot"></div><div class="label">Запланирован</div><div class="at">06.10 09:00</div></div>
+          <div class="timeline-step done"><div class="dot"></div><div class="label">В работе</div><div class="at">06.10 09:04</div></div>
+          <div class="timeline-step"><div class="dot"></div><div class="label">Проверка качества</div></div>
+          <div class="timeline-step"><div class="dot"></div><div class="label">Завершён</div></div>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns:2fr 1fr">
+        <div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="grid cols-3">
+              <div><b>Клиент:</b> ООО «Ромашка»</div>
+              <div><b>Объект:</b> БЦ «Меркурий», оф. 402</div>
+              <div><b>Услуга:</b> Генеральная уборка офиса</div>
+              <div><b>Запланировано:</b> 06.10.2026 09:00</div>
+              <div><b>Исполнитель:</b> Бригада А</div>
+              <div><b>Цена:</b> 18 500 ₽ RUB</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px">
+            <h3 style="margin-top:0">Чек-лист</h3>
+            <div style="display:flex; gap:8px; align-items:center; padding:6px 0">
+              <span class="badge green">PASSED</span><span style="flex:1">Полы вымыты во всех помещениях</span>
+              <span class="btn sm">✓</span><span class="btn sm danger">✗</span>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; padding:6px 0">
+              <span class="badge green">PASSED</span><span style="flex:1">Санузлы продезинфицированы</span>
+              <span class="btn sm">✓</span><span class="btn sm danger">✗</span>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; padding:6px 0">
+              <span class="badge green">PASSED</span><span style="flex:1">Мусор вынесен, корзины заменены</span>
+              <span class="btn sm">✓</span><span class="btn sm danger">✗</span>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; padding:6px 0">
+              <span class="badge gray">PENDING</span><span style="flex:1">Стёкла и зеркала без разводов</span>
+              <span class="btn sm">✓</span><span class="btn sm danger">✗</span>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; padding:6px 0">
+              <span class="badge gray">PENDING</span><span style="flex:1">Кухня: поверхности и мойка</span>
+              <span class="btn sm">✓</span><span class="btn sm danger">✗</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 style="margin-top:0">Вложения</h3>
+            <ul>
+              <li><a href="#">photo-floor.jpg</a> <span class="badge">PHOTO</span> <span class="badge green">видно клиенту</span></li>
+            </ul>
+            <div class="toolbar" style="margin-top:12px">
+              <input class="input" placeholder="https://…">
+              <select class="input" style="max-width:130px"><option>Фото</option><option>Видео</option><option>Документ</option></select>
+              <label style="font-size:13px"><input type="checkbox"> видно клиенту</label>
+              <span class="btn sm">Добавить</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-top:0">Действия</h3>
+          <span class="btn primary disabled" style="width:100%" title="Все пункты чек-листа должны быть PASSED">Сдать на проверку</span>
+          <p style="color:var(--muted); font-size:12px">
+            Кнопка станет активной, когда все пункты чек-листа — PASSED.
+            После сдачи заказ перейдёт в <span class="badge purple">QUALITY_CHECK</span> —
+            см. <a href="order-quality.html">этап «Контроль качества»</a>.
+          </p>
+          <span class="btn danger" style="width:100%; margin-top:8px">Отменить заказ</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

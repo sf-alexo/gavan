@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QR-скан — мокап</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="mock-note">
+  <a href="index.html">← Все мокапы</a>
+  <span>Шаг 4: сотрудник сканирует QR объекта (publicId) · Экран «QR-скан» · Роль: EMPLOYEE · Демо-данные</span>
+</div>
+<div class="phone-wrap">
+  <div class="phone">
+    <div class="p-top"><span>09:01</span><span>Gavan CRM</span><span>Игорь С.</span></div>
+    <div class="p-body">
+      <h3 style="margin-top:0">QR-скан объекта</h3>
+      <div class="qr-box">
+        📷 &nbsp;Наведите камеру на QR-код объекта<br>
+        <span style="font-size:11px">наклейка у входа / в кладовой</span>
+      </div>
+      <div style="text-align:center; color:var(--muted); font-size:12px; margin-bottom:16px">— код распознан —</div>
+
+      <div class="card" style="padding:14px; margin-bottom:12px">
+        <div style="font-size:12px; color:var(--muted)">Объект · <code>pub-obj-3</code></div>
+        <b>Склад «Вектра», Северный р-н</b>
+        <div style="font-size:13px; color:var(--muted); margin-top:4px">пр. Индустриальный 42, ворота 2</div>
+      </div>
+
+      <div class="card" style="padding:14px; border-color:var(--primary)">
+        <div style="font-size:12px; color:var(--muted)">Ваш заказ на сегодня</div>
+        <div style="font-size:16px; font-weight:700; margin:4px 0">ORD-SEED-003 <span class="badge blue">ASSIGNED</span></div>
+        <div style="font-size:13px">Уборка склада · 08:00–14:00</div>
+        <div style="font-size:13px; color:var(--muted); margin-top:4px">Чек-лист: 4 пункта</div>
+        <a class="btn primary" href="order-quality.html" style="width:100%; text-align:center; margin-top:12px">Начать работу</a>
+      </div>
+
+      <p style="font-size:11px; color:var(--muted); margin-top:14px">
+        Сканирование <code>publicId</code> находит заказ сотрудника на этот объект.
+        Чужие заказы и внутренние данные (цена, контакты клиента) сотруднику не показываются.
+      </p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

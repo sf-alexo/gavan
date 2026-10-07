@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Заявки — мокап</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .c-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .kanban-col { display: flex; flex-direction: column; }
+  .kanban-col .cnt { float: right; }
+  .kanban-cards { flex: 1; min-height: 80px; border-radius: 8px; }
+  .kanban-cards.drop-over { outline: 2px dashed var(--primary); outline-offset: 2px; background: #e6efff; }
+  .kanban-card { cursor: grab; }
+  .kanban-card:active { cursor: grabbing; }
+  .kanban-card.dragging { opacity: .5; }
+  .err { color: var(--danger); font-size: 12px; margin-top: 4px; display: none; }
+  .col-new h4 { color: #1e40af; }
+  .col-proc h4 { color: #92400e; }
+  .col-won h4 { color: #166534; }
+  .col-lost h4 { color: #991b1b; }
+</style>
+</head>
+<body>
+<div class="mock-note">
+  <a href="index.html">← Все мокапы</a>
+  <span>Шаг 1: входящий поток · Экран «Заявки» (kanban, drag-and-drop) · Роль: MANAGER · Демо-данные, интерактивный mockup (JS)</span>
+</div>
+<input class="navtoggle" id="navtoggle" type="checkbox">
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">Gavan CRM <label class="side-close" for="navtoggle" title="Свернуть меню">«</label></div>
+    <nav>
+      <a href="index.html">← Схема процесса</a>
+      <a href="login.html">Вход</a>
+      <a href="dashboard.html">Дашборд</a>
+      <a href="clients.html">Клиенты</a>
+      <a href="leads.html" class="active">Заявки</a>
+      <a href="deals.html">Сделки</a>
+      <a href="orders.html">Заказы</a>
+      <a href="order-assign.html">Заказ: назначение</a>
+      <a href="order-work.html">Заказ: уборка</a>
+      <a href="order-quality.html">Заказ: проверка</a>
+      <a href="calendar.html">Календарь</a>
+      <a href="scan.html">QR-скан</a>
+      <a href="client-cabinet.html">Кабинет клиента</a>
+      <a href="tasks.html">Задачи</a>
+      <a href="history.html">История</a>
+    </nav>
+    <div class="user-block">
+      <div>Елена Менеджерова</div>
+      <div style="opacity:.7">MANAGER</div>
+      <span class="btn sm" style="margin-top:8px">Выйти</span>
+    </div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <label class="btn navhide" for="navtoggle" title="Скрыть/показать меню">☰</label>
+      <strong>Гавань — клининг CRM</strong>
+      <div class="topbar-right">
+        <details class="dd">
+          <summary><span class="icon-btn">🔔<span class="n-dot">3</span></span></summary>
+          <div class="dd-menu">
+            <div class="dd-title">Уведомления</div>
+            <a href="order-quality.html">ORD-SEED-003 сдан на проверку</a>
+            <a href="deals.html">Сделка «Вектра» выиграна · 96 000 ₽</a>
+            <a href="leads.html">Новая заявка с сайта</a>
+          </div>
+        </details>
+        <details class="dd">
+          <summary>
+            <span class="avatar">ЕМ</span>
+            <span class="u-meta"><b>Елена Менеджерова</b><i>MANAGER</i></span>
+            <span style="color:var(--muted)">▾</span>
+          </summary>
+          <div class="dd-menu">
+            <a href="#">Профиль</a>
+            <a href="#">Сменить пароль</a>
+            <a href="login.html">Выйти</a>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="content">
+
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap">
+        <div>
+          <h2 style="margin-bottom:2px">Заявки</h2>
+          <p style="color:var(--muted); margin:0 0 16px; font-size:14px">Входящие обращения клиентов — перетаскивайте карточки между колонками</p>
+        </div>
+        <span class="btn primary" id="btnNew">+ Новая заявка</span>
+      </div>
+
+      <div class="toolbar">
+        <input class="input" id="q" style="max-width:340px" placeholder="Поиск по клиенту, заявке, телефону или объекту">
+        <select class="input" id="fSource" style="max-width:160px">
+          <option value="">Источник: все</option>
+          <option>Сайт</option><option>Телефон</option><option>WhatsApp</option><option>Telegram</option>
+          <option>Avito</option><option>Яндекс Бизнес</option><option>Рекомендация</option><option>Тендер</option><option>Другое</option>
+        </select>
+        <select class="input" id="fManager" style="max-width:170px">
+          <option value="">Менеджер: все</option><option>Алексей Смирнов</option><option>Мария Ким</option><option value="none">Не назначен</option>
+        </select>
+        <select class="input" id="fEmployee" style="max-width:160px">
+          <option value="">Сотрудник: все</option><option>Иван Петров</option><option>Олег Иванов</option><option>Сергей Петров</option><option value="none">Не назначен</option>
+        </select>
+        <span class="btn" id="btnReset">Сбросить</span>
+      </div>
+
+      <div class="kanban" id="board"></div>
+      <div id="empty" class="card empty" style="display:none">
+        <b>Заявки не найдены</b>
+        <p style="color:var(--muted)">Попробуйте изменить параметры поиска или фильтров.</p>
+        <span class="btn" id="btnReset2">Сбросить фильтры</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="drawer-backdrop" id="backdrop"></div>
+<aside class="drawer" id="drawer"></aside>
+
+<div class="modal-backdrop" id="modalLost" style="display:none">
+  <div class="modal">
+    <h3>Причина потери</h3>
+    <label class="field"><span>Причина *</span>
+      <select class="input" id="lostReason">
+        <option value="">— выберите —</option>
+        <option value="PRICE">Цена</option>
+        <option value="COMPETITOR">Клиент выбрал другую компанию</option>
+        <option value="REFUSED">Клиент отказался</option>
+        <option value="NO_CONTACT">Не удалось связаться</option>
+        <option value="OBJECT">Объект не подходит</option>
+        <option value="TIMING">Сроки</option>
+        <option value="OTHER">Другое</option>
+      </select>
+      <div class="err" id="eReason">Укажите причину потери</div>
+    </label>
+    <label class="field"><span>Комментарий</span><textarea class="input" id="lostComment" rows="2"></textarea></label>
+    <div class="actions">
+      <span class="btn" onclick="closeLost()">Отмена</span>
+      <span class="btn danger" id="btnLostSave">Сохранить</span>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalNew" style="display:none">
+  <div class="modal">
+    <h3>Новая заявка</h3>
+    <label class="field"><span>Источник *</span>
+      <select class="input" id="nSource"><option value="">— выберите —</option>
+        <option>Сайт</option><option>Телефон</option><option>WhatsApp</option><option>Telegram</option>
+        <option>Avito</option><option>Яндекс Бизнес</option><option>Рекомендация</option><option>Тендер</option><option>Другое</option>
+      </select>
+      <div class="err" id="eSource">Укажите источник заявки</div>
+    </label>
+    <label class="field"><span>Клиент *</span>
+      <select class="input" id="nClient"><option value="">— выберите —</option></select>
+      <div class="err" id="eClient">Выберите клиента</div>
+    </label>
+    <label class="field"><span>Информация *</span>
+      <textarea class="input" id="nInfo" rows="3" placeholder="Что нужно клиенту?"></textarea>
+      <div class="err" id="eInfo">Добавьте информацию о запросе</div>
+    </label>
+    <label class="field"><span>Менеджер</span>
+      <select class="input" id="nManager"><option value="">— не назначен —</option><option>Алексей Смирнов</option><option>Мария Ким</option></select>
+    </label>
+    <label class="field"><span>Сотрудник</span>
+      <select class="input" id="nEmployee"><option value="">— не назначен —</option><option>Иван Петров</option><option>Олег Иванов</option><option>Сергей Петров</option></select>
+    </label>
+    <label class="field"><span>Объекты</span></label>
+    <div id="nObjects" style="border:1px solid var(--border); border-radius:8px; padding:8px 10px; max-height:130px; overflow:auto; font-size:13px"></div>
+    <div class="actions">
+      <span class="btn" onclick="closeNew()">Отмена</span>
+      <span class="btn primary" id="btnCreate">Создать заявку</span>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+const STATUSES = { RECEIVED:['Получено','blue'], IN_PROGRESS:['В обработке','amber'], WON:['Выиграна','green'], LOST:['Потеряна','red'] };
+const COLS = [
+  ['RECEIVED','Получено','col-new'],
+  ['IN_PROGRESS','В обработке','col-proc'],
+  ['WON','Выиграна','col-won'],
+  ['LOST','Потеряна','col-lost'],
+];
+const REASONS = { PRICE:'Цена', COMPETITOR:'Клиент выбрал другую компанию', REFUSED:'Клиент отказался', NO_CONTACT:'Не удалось связаться', OBJECT:'Объект не подходит', TIMING:'Сроки', OTHER:'Другое' };
+const MANAGERS = ['Алексей Смирнов','Мария Ким'];
+const EMPLOYEES = ['Иван Петров','Олег Иванов','Сергей Петров'];
+
+const CLIENTS = [
+ {id:'cl1',name:'Анна Петрова',phone:'+7 777 901-45-78'},
+ {id:'cl2',name:'ООО «Меридиан»',phone:'+7 727 300-11-22'},
+ {id:'cl3',name:'Дмитрий Соколов',phone:'+7 701 555-88-40'},
+ {id:'cl4',name:'ТОО «Новая Линия»',phone:'+7 702 456-12-90'},
+ {id:'cl5',name:'ООО «Вектор»',phone:'+7 701 123-45-67'},
+ {id:'cl6',name:'ТОО «Альфа Сервис»',phone:'+7 702 555-01-20'},
+ {id:'cl7',name:'БЦ «Орбита»',phone:'+7 717 200-33-14'},
+ {id:'cl8',name:'Елена Морозова',phone:'+7 705 222-77-31'},
+ {id:'cl9',name:'ООО «Стандарт»',phone:'+7 727 244-60-80'},
+ {id:'cl10',name:'ООО «Горизонт»',phone:'+7 701 900-45-12'},
+ {id:'cl11',name:'Сергей Волков',phone:'+7 777 130-20-55'},
+ {id:'cl12',name:'ООО «Промстрой»',phone:'+7 727 390-14-77'},
+ {id:'cl13',name:'Ирина Павлова',phone:'+7 701 640-98-21'},
+ {id:'cl14',name:'ООО «Север»',phone:'+7 717 250-66-09'},
+];
+const OBJECTS = [
+ {id:'o1',name:'Квартира клиента',type:'Квартира',addr:'Алматы, ул. Розыбакиева, 120, кв. 45',area:'78 м²',status:'Активен'},
+ {id:'o2',name:'Офис «Меридиан»',type:'Офис',addr:'Алматы, пр. Достык, 210',area:'420 м²',status:'Активен'},
+ {id:'o3',name:'Частный дом',type:'Дом',addr:'пос. Боровое, уч. 18',area:'140 м²',status:'Активен'},
+ {id:'o4',name:'Складской комплекс',type:'Склад',addr:'Алматы, Северная кольцевая, 5',area:'2 100 м²',status:'Активен'},
+ {id:'o5',name:'Бизнес-центр «Вектор»',type:'БЦ',addr:'Алматы, пр. Абая, 88',area:'1 200 м²',status:'Активен'},
+ {id:'o6',name:'Склад «Вектор»',type:'Склад',addr:'Алматы, ул. Промышленная, 14',area:'4 800 м²',status:'Активен'},
+ {id:'o7',name:'Производственный корпус',type:'Производство',addr:'Алматы, Индустриальная зона, 3',area:'3 400 м²',status:'Активен'},
+ {id:'o8',name:'Склад',type:'Склад',addr:'Алматы, Индустриальная зона, 5',area:'900 м²',status:'Активен'},
+ {id:'o9',name:'Бизнес-центр «Орбита»',type:'БЦ',addr:'Алматы, ул. Тимирязева, 42',area:'2 600 м²',status:'Активен'},
+ {id:'o10',name:'Частный дом',type:'Дом',addr:'Алматы, мкр. Коктобе, 7',area:'210 м²',status:'Активен'},
+ {id:'o11',name:'Офис «Стандарт»',type:'Офис',addr:'Алматы, ул. Наурызбай батыра, 63',area:'380 м²',status:'Активен'},
+ {id:'o12',name:'Квартира',type:'Квартира',addr:'Алматы, ул. Жандосова, 12, кв. 9',area:'64 м²',status:'Активен'},
+ {id:'o13',name:'Производственный корпус',type:'Производство',addr:'Алматы, ул. Суюнбая, 220',area:'5 000 м²',status:'Активен'},
+ {id:'o14',name:'Частный дом',type:'Дом',addr:'Алматы, мкр. Мирас, 33',area:'160 м²',status:'Активен'},
+ {id:'o15',name:'Производственный комплекс',type:'Производство',addr:'Алматы, Индустриальная зона, 11',area:'7 200 м²',status:'Активен'},
+ {id:'o16',name:'Квартира',type:'Квартира',addr:'Алматы, пр. Райымбека, 300, кв. 21',area:'55 м²',status:'Активен'},
+ {id:'o17',name:'Склад',type:'Склад',addr:'Алматы, пос. Калкаман, 2',area:'1 400 м²',status:'Активен'},
+];
+const clientById = id => CLIENTS.find(c=>c.id===id);
+const objById = id => OBJECTS.find(o=>o.id===id);
+const now = () => { const d=new Date(); return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
+const H = (at,action,details='') => ({at,action,details});
+
+const applications = [
+ {id:'#1049',title:'Генеральная уборка квартиры',source:'Сайт',clientId:'cl1',information:'Генеральная уборка квартиры после ремонта.',managerId:null,employeeId:null,objectIds:['o1'],status:'RECEIVED',createdAt:'06.10 13:02',history:[H('06.10 13:02','Заявка получена','Источник: сайт')]},
+ {id:'#1050',title:'Регулярная уборка офиса',source:'Телефон',clientId:'cl2',information:'Требуется регулярная уборка офисного помещения.',managerId:null,employeeId:null,objectIds:['o2'],status:'RECEIVED',createdAt:'06.10 11:20',history:[H('06.10 11:20','Заявка получена','Источник: телефон')]},
+ {id:'#1051',title:'Мойка окон',source:'WhatsApp',clientId:'cl3',information:'Требуется мойка окон в частном доме.',managerId:null,employeeId:null,objectIds:['o3'],status:'RECEIVED',createdAt:'06.10 09:48',history:[H('06.10 09:48','Заявка получена','Источник: WhatsApp')]},
+ {id:'#1052',title:'Обслуживание склада',source:'Рекомендация',clientId:'cl4',information:'Клиент интересуется регулярным обслуживанием склада.',managerId:null,employeeId:null,objectIds:['o4'],status:'RECEIVED',createdAt:'05.10 17:31',history:[H('05.10 17:31','Заявка получена','Источник: рекомендация')]},
+ {id:'#1048',title:'Уборка офисного комплекса',source:'Сайт',clientId:'cl5',information:'Регулярная уборка офисного комплекса 3 раза в неделю. Клиент также рассматривает обслуживание склада.',managerId:'Алексей Смирнов',employeeId:'Иван Петров',objectIds:['o5','o6'],status:'IN_PROGRESS',createdAt:'02.10 10:42',history:[
+   H('02.10 10:42','Заявка получена','Источник: сайт'),H('02.10 10:50','Назначен менеджер','Алексей Смирнов'),H('02.10 11:20','Добавлен объект','Бизнес-центр «Вектор»'),H('02.10 12:10','Назначен сотрудник','Иван Петров'),H('02.10 14:30','Статус изменён','Получено → В обработке')]},
+ {id:'#1047',title:'Комплексное обслуживание',source:'Тендер',clientId:'cl6',information:'Комплексное обслуживание производственного помещения и склада.',managerId:'Мария Ким',employeeId:'Олег Иванов',objectIds:['o7','o8'],status:'IN_PROGRESS',createdAt:'02.10 09:15',history:[
+   H('02.10 09:15','Заявка получена','Источник: тендер'),H('02.10 10:00','Назначен менеджер','Мария Ким'),H('02.10 15:40','Статус изменён','Получено → В обработке')]},
+ {id:'#1046',title:'Ежедневная уборка БЦ',source:'Телефон',clientId:'cl7',information:'Требуется ежедневная уборка бизнес-центра.',managerId:'Алексей Смирнов',employeeId:'Сергей Петров',objectIds:['o9'],status:'IN_PROGRESS',createdAt:'01.10 16:05',history:[
+   H('01.10 16:05','Заявка получена','Источник: телефон'),H('01.10 16:40','Назначен менеджер','Алексей Смирнов'),H('02.10 09:10','Статус изменён','Получено → В обработке')]},
+ {id:'#1045',title:'Уборка дома перед заселением',source:'Avito',clientId:'cl8',information:'Генеральная уборка дома перед заселением.',managerId:'Мария Ким',employeeId:null,objectIds:['o10'],status:'IN_PROGRESS',createdAt:'01.10 12:20',history:[
+   H('01.10 12:20','Заявка получена','Источник: Avito'),H('01.10 14:00','Назначен менеджер','Мария Ким'),H('02.10 10:30','Статус изменён','Получено → В обработке')]},
+ {id:'#1044',title:'Обслуживание офиса',source:'Сайт',clientId:'cl9',information:'Регулярное обслуживание офисного помещения.',managerId:'Алексей Смирнов',employeeId:'Иван Петров',objectIds:['o11'],status:'WON',createdAt:'29.09 15:12',history:[
+   H('29.09 15:12','Заявка получена','Источник: сайт'),H('29.09 16:00','Назначен менеджер','Алексей Смирнов'),H('30.09 11:25','Статус изменён','В обработке → Выиграна')]},
+ {id:'#1043',title:'Генеральная уборка квартиры',source:'Рекомендация',clientId:'cl1',information:'Генеральная уборка квартиры.',managerId:'Мария Ким',employeeId:'Олег Иванов',objectIds:['o12'],status:'WON',createdAt:'29.09 10:40',history:[
+   H('29.09 10:40','Заявка получена','Источник: рекомендация'),H('29.09 14:15','Статус изменён','В обработке → Выиграна')]},
+ {id:'#1042',title:'Уборка производства',source:'Телефон',clientId:'cl10',information:'Регулярная уборка производственного помещения.',managerId:'Алексей Смирнов',employeeId:'Сергей Петров',objectIds:['o13'],status:'WON',createdAt:'28.09 13:55',history:[
+   H('28.09 13:55','Заявка получена','Источник: телефон'),H('29.09 09:30','Статус изменён','В обработке → Выиграна')]},
+ {id:'#1041',title:'Уборка дома и мойка окон',source:'WhatsApp',clientId:'cl11',information:'Уборка частного дома и мойка окон.',managerId:'Мария Ким',employeeId:'Олег Иванов',objectIds:['o14'],status:'WON',createdAt:'27.09 17:48',history:[
+   H('27.09 17:48','Заявка получена','Источник: WhatsApp'),H('28.09 12:05','Статус изменён','В обработке → Выиграна')]},
+ {id:'#1040',title:'Обслуживание производства',source:'Тендер',clientId:'cl12',information:'Комплексное обслуживание производственного объекта.',managerId:'Алексей Смирнов',employeeId:null,objectIds:['o15'],status:'LOST',lostReason:'PRICE',lostComment:'Клиенту дорого',createdAt:'26.09 14:10',history:[
+   H('26.09 14:10','Заявка получена','Источник: тендер'),H('27.09 11:00','Статус изменён','В обработке → Потеряна'),H('27.09 11:00','Причина потери','Цена')]},
+ {id:'#1039',title:'Генеральная уборка квартиры',source:'Сайт',clientId:'cl13',information:'Генеральная уборка квартиры.',managerId:'Мария Ким',employeeId:null,objectIds:['o16'],status:'LOST',lostReason:'COMPETITOR',lostComment:'',createdAt:'25.09 12:30',history:[
+   H('25.09 12:30','Заявка получена','Источник: сайт'),H('26.09 10:15','Статус изменён','В обработке → Потеряна'),H('26.09 10:15','Причина потери','Клиент выбрал другую компанию')]},
+ {id:'#1038',title:'Уборка склада',source:'Телефон',clientId:'cl14',information:'Регулярная уборка складского помещения.',managerId:'Алексей Смирнов',employeeId:null,objectIds:['o17'],status:'LOST',lostReason:'NO_CONTACT',lostComment:'Три звонка без ответа',createdAt:'24.09 09:20',history:[
+   H('24.09 09:20','Заявка получена','Источник: телефон'),H('25.09 16:45','Статус изменён','В обработке → Потеряна'),H('25.09 16:45','Причина потери','Не удалось связаться')]},
+];
+
+const clientHistory = {};
+CLIENTS.forEach(c=>clientHistory[c.id]=[]);
+applications.forEach(a=>{
+  clientHistory[a.clientId].push({at:a.createdAt, action:`Заявка ${a.id} получена · ${a.source}`});
+  if (a.status!=='RECEIVED') clientHistory[a.clientId].push({at:a.history.at(-2)?.at||a.createdAt, action:`Заявка ${a.id} переведена в «${STATUSES[a.status][0]}»`});
+  if (a.status==='LOST') clientHistory[a.clientId].push({at:a.history.at(-1).at, action:`Заявка ${a.id} потеряна. Причина: ${REASONS[a.lostReason]}`});
+});
+const pushHist = (a,action,details='') => {
+  a.history.push(H(now(),action,details));
+  let txt;
+  if (action==='Статус изменён') txt = `Заявка ${a.id} переведена в «${details.split('→ ')[1]}»`;
+  else if (action==='Назначен менеджер') txt = `По заявке ${a.id} назначен менеджер ${details}`;
+  else if (action==='Снят менеджер') txt = `По заявке ${a.id} снят менеджер`;
+  else if (action==='Назначен сотрудник') txt = `По заявке ${a.id} назначен сотрудник ${details}`;
+  else if (action==='Снят сотрудник') txt = `По заявке ${a.id} снят сотрудник`;
+  else if (action==='Добавлен объект') txt = `К заявке ${a.id} добавлен объект «${details}»`;
+  else if (action==='Причина потери') txt = `Заявка ${a.id} потеряна. Причина: ${details}`;
+  if (txt) {
+    clientHistory[a.clientId].push({at:now(), action:txt});
+    try {
+      const ev = JSON.parse(localStorage.getItem('gavan_client_events')||'[]');
+      ev.push({name: clientById(a.clientId).name, at: now(), action: txt});
+      localStorage.setItem('gavan_client_events', JSON.stringify(ev));
+    } catch (e) {}
+  }
+};
+
+const esc = s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const badge = (t,cls)=>`<span class="badge ${cls}">${t}</span>`;
+
+const board=document.getElementById('board'), empty=document.getElementById('empty');
+const q=document.getElementById('q'), fSource=document.getElementById('fSource'),
+      fManager=document.getElementById('fManager'), fEmployee=document.getElementById('fEmployee');
+
+function filtered(){
+  const s=q.value.trim().toLowerCase();
+  return applications.filter(a=>{
+    const cl=clientById(a.clientId);
+    const objs=a.objectIds.map(o=>objById(o).name).join(' ');
+    const hay=[a.id,a.title,a.information,cl.name,cl.phone,objs,a.source].join(' ').toLowerCase();
+    return (!s||hay.includes(s))
+      &&(!fSource.value||a.source===fSource.value)
+      &&(!fManager.value||(fManager.value==='none'?!a.managerId:a.managerId===fManager.value))
+      &&(!fEmployee.value||(fEmployee.value==='none'?!a.employeeId:a.employeeId===fEmployee.value));
+  });
+}
+const card = a => {
+  const cl=clientById(a.clientId);
+  return `<div class="kanban-card" draggable="true" data-id="${a.id}">
+    <div style="display:flex;justify-content:space-between;gap:6px"><b>${a.id}</b>${badge(a.source,'gray')}</div>
+    <div style="font-weight:600;margin-top:4px">${esc(a.title)}</div>
+    <div class="c-sub">${esc(cl.name)}</div>
+    <div class="c-sub">${a.objectIds.length} объект(а)</div>
+    <div class="c-sub">М: ${a.managerId?esc(a.managerId):'—'} · С: ${a.employeeId?esc(a.employeeId):'—'}</div>
+    <div class="c-sub" style="margin-top:4px">${a.createdAt}</div>
+  </div>`;
+};
+function render(){
+  const rows=filtered();
+  empty.style.display = rows.length ? 'none' : '';
+  board.style.display = rows.length ? 'flex' : 'none';
+  board.innerHTML = COLS.map(([st,title,cls])=>{
+    const items=rows.filter(a=>a.status===st);
+    return `<div class="kanban-col ${cls}">
+      <h4>${title} <span class="cnt">${items.length}</span></h4>
+      <div class="kanban-cards" data-s="${st}">
+        ${items.map(card).join('')||'<div class="c-sub" style="text-align:center;padding:12px 4px">Нет заявок</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+function resetFilters(){ q.value='';fSource.value='';fManager.value='';fEmployee.value=''; render(); }
+[q,fSource,fManager,fEmployee].forEach(el=>{el.addEventListener('input',render);el.addEventListener('change',render);});
+btnReset.onclick=resetFilters; btnReset2.onclick=resetFilters;
+
+/* Drag & drop */
+let dragId=null, suppressClick=false;
+board.addEventListener('dragstart',e=>{
+  const c=e.target.closest('.kanban-card'); if(!c) return;
+  dragId=c.dataset.id; suppressClick=true;
+  e.dataTransfer.effectAllowed='move';
+  requestAnimationFrame(()=>c.classList.add('dragging'));
+});
+board.addEventListener('dragend',e=>{
+  e.target.closest('.kanban-card')?.classList.remove('dragging');
+  document.querySelectorAll('.kanban-cards.drop-over').forEach(x=>x.classList.remove('drop-over'));
+  setTimeout(()=>suppressClick=false,0);
+});
+board.addEventListener('dragover',e=>{
+  const zone=e.target.closest('.kanban-cards'); if(!zone) return;
+  e.preventDefault(); e.dataTransfer.dropEffect='move';
+  document.querySelectorAll('.kanban-cards.drop-over').forEach(x=>{if(x!==zone)x.classList.remove('drop-over');});
+  zone.classList.add('drop-over');
+});
+board.addEventListener('dragleave',e=>{
+  const zone=e.target.closest('.kanban-cards');
+  if(zone && !zone.contains(e.relatedTarget)) zone.classList.remove('drop-over');
+});
+board.addEventListener('drop',e=>{
+  const zone=e.target.closest('.kanban-cards'); if(!zone||!dragId) return;
+  e.preventDefault(); zone.classList.remove('drop-over');
+  const a=applications.find(x=>x.id===dragId); dragId=null;
+  const ns=zone.dataset.s; if(!a||ns===a.status) return;
+  if(ns==='LOST'){ openLost(a); render(); return; }
+  pushHist(a,'Статус изменён',`${STATUSES[a.status][0]} → ${STATUSES[ns][0]}`);
+  a.status=ns;
+  if(ns==='WON') toast(`Заявка ${a.id} выиграна`);
+  render();
+  if(cur===a) openDrawer(a);
+});
+board.addEventListener('click',e=>{
+  if(suppressClick) return;
+  const c=e.target.closest('.kanban-card'); if(!c) return;
+  openDrawer(applications.find(a=>a.id===c.dataset.id));
+});
+
+/* Drawer */
+const drawer=document.getElementById('drawer'), backdrop=document.getElementById('backdrop');
+let cur=null;
+function closeDrawer(){drawer.classList.remove('open');backdrop.classList.remove('open');cur=null;}
+backdrop.onclick=closeDrawer;
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeLost();closeNew();}});
+
+function openDrawer(a){
+  cur=a;
+  const cl=clientById(a.clientId);
+  drawer.innerHTML=`
+   <div class="card">
+    <div class="drawer-head">
+      <div>
+        <div style="font-size:18px;font-weight:700">Заявка ${a.id} ${badge(...STATUSES[a.status])}</div>
+        <div class="c-sub" style="margin-top:4px">${esc(a.title)}</div>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+   </div>
+
+   <div class="card" style="margin-top:12px"><b>Информация</b>
+     <p style="margin:8px 0 10px;font-size:14px">${esc(a.information)}</p>
+     <div class="kv"><b>Источник:</b> ${badge(a.source,'gray')}</div>
+     <div class="kv"><b>Клиент:</b> <a href="clients.html">${esc(cl.name)}</a> · ${esc(cl.phone)}</div>
+     <div class="kv"><b>Дата:</b> ${a.createdAt}</div>
+     ${a.status==='LOST'?`<div class="kv"><b>Причина потери:</b> ${REASONS[a.lostReason]}${a.lostComment?` — ${esc(a.lostComment)}`:''}</div>`:''}
+   </div>
+
+   <div class="card" style="margin-top:12px"><b>Объекты</b>
+     <div id="dObjs">${a.objectIds.map(oid=>{const o=objById(oid);return `<div class="mini-card"><b>${esc(o.name)}</b>
+        <div class="sub">Тип: ${esc(o.type)} · ${esc(o.addr)} · ${esc(o.area)} · ${badge(o.status,'green')}</div></div>`;}).join('')||'<span class="c-sub">Нет объектов</span>'}</div>
+     <div style="display:flex;gap:8px;margin-top:8px">
+       <select class="input" id="addObjSel" style="flex:1"><option value="">— объект —</option>
+         ${OBJECTS.filter(o=>!a.objectIds.includes(o.id)).map(o=>`<option value="${o.id}">${esc(o.name)} · ${esc(o.type)}</option>`).join('')}</select>
+       <span class="btn sm" id="addObjBtn">+ Добавить объект</span>
+     </div>
+   </div>
+
+   <div class="card" style="margin-top:12px">
+     <label class="field"><span>Менеджер</span>
+       <select class="input" id="dManager"><option value="">Не назначен</option>
+         ${MANAGERS.map(m=>`<option ${a.managerId===m?'selected':''}>${m}</option>`).join('')}</select></label>
+     <label class="field" style="margin-bottom:0"><span>Сотрудник</span>
+       <select class="input" id="dEmployee"><option value="">Не назначен</option>
+         ${EMPLOYEES.map(m=>`<option ${a.employeeId===m?'selected':''}>${m}</option>`).join('')}</select></label>
+   </div>
+
+   <div class="card" style="margin-top:12px">
+     <label class="field" style="margin-bottom:0"><span>Статус</span>
+       <select class="input" id="dStatus">
+         ${Object.entries(STATUSES).map(([k,[t]])=>`<option value="${k}" ${a.status===k?'selected':''}>${t}</option>`).join('')}
+       </select></label>
+     ${a.status==='WON'?`<a class="btn primary" href="deals.html?from=${a.id.slice(1)}" style="margin-top:10px">Создать сделку →</a>`:''}
+   </div>
+
+   <div class="card" style="margin-top:12px"><b>История заявки</b>
+     <div id="dHist">${a.history.slice().reverse().map(h=>`<div class="hist-item"><span class="when">${h.at}</span><span><b>${esc(h.action)}</b>${h.details?`<div class="c-sub">${esc(h.details)}</div>`:''}</span></div>`).join('')}</div>
+   </div>`;
+  drawer.classList.add('open'); backdrop.classList.add('open');
+
+  document.getElementById('dManager').onchange=e=>{
+    const v=e.target.value||null;
+    if(v===a.managerId) return;
+    pushHist(a, v?'Назначен менеджер':'Снят менеджер', v||a.managerId);
+    a.managerId=v; render(); openDrawer(a);
+  };
+  document.getElementById('dEmployee').onchange=e=>{
+    const v=e.target.value||null;
+    if(v===a.employeeId) return;
+    pushHist(a, v?'Назначен сотрудник':'Снят сотрудник', v||a.employeeId);
+    a.employeeId=v; render(); openDrawer(a);
+  };
+  document.getElementById('addObjBtn').onclick=()=>{
+    const sel=document.getElementById('addObjSel'); if(!sel.value) return;
+    a.objectIds.push(sel.value);
+    pushHist(a,'Добавлен объект',objById(sel.value).name);
+    render(); openDrawer(a);
+  };
+  document.getElementById('dStatus').onchange=e=>{
+    const ns=e.target.value; if(ns===a.status) return;
+    if(ns==='LOST'){ e.target.value=a.status; openLost(a); return; }
+    pushHist(a,'Статус изменён',`${STATUSES[a.status][0]} → ${STATUSES[ns][0]}`);
+    a.status=ns;
+    if(ns==='WON') toast(`Заявка ${a.id} выиграна`);
+    render(); openDrawer(a);
+  };
+}
+
+/* Lost modal */
+const modalLost=document.getElementById('modalLost'); let lostTarget=null;
+function openLost(a){ lostTarget=a; document.getElementById('lostReason').value=''; document.getElementById('lostComment').value=''; document.getElementById('eReason').style.display='none'; modalLost.style.display='flex'; }
+function closeLost(){ modalLost.style.display='none'; lostTarget=null; }
+modalLost.addEventListener('click',e=>{if(e.target===modalLost)closeLost();});
+document.getElementById('btnLostSave').onclick=()=>{
+  const r=document.getElementById('lostReason').value;
+  if(!r){document.getElementById('eReason').style.display='block';return;}
+  const a=lostTarget;
+  pushHist(a,'Статус изменён',`${STATUSES[a.status][0]} → Потеряна`);
+  a.status='LOST'; a.lostReason=r; a.lostComment=document.getElementById('lostComment').value.trim();
+  pushHist(a,'Причина потери',REASONS[r]);
+  closeLost(); render(); if(cur===a)openDrawer(a);
+};
+
+/* New application modal */
+const modalNew=document.getElementById('modalNew');
+function openNew(){
+  document.getElementById('nClient').innerHTML='<option value="">— выберите —</option>'+CLIENTS.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  document.getElementById('nObjects').innerHTML=OBJECTS.map(o=>`<label style="display:flex;gap:8px;padding:3px 0"><input type="checkbox" value="${o.id}"> ${esc(o.name)} <span class="c-sub">${esc(o.type)}</span></label>`).join('');
+  ['nSource','nClient','nInfo','nManager','nEmployee'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('#nObjects input').forEach(i=>i.checked=false);
+  ['eSource','eClient','eInfo'].forEach(id=>document.getElementById(id).style.display='none');
+  modalNew.style.display='flex';
+}
+function closeNew(){modalNew.style.display='none';}
+document.getElementById('btnNew').onclick=openNew;
+modalNew.addEventListener('click',e=>{if(e.target===modalNew)closeNew();});
+document.getElementById('btnCreate').onclick=()=>{
+  const src=document.getElementById('nSource').value,
+        cid=document.getElementById('nClient').value,
+        info=document.getElementById('nInfo').value.trim();
+  let ok=true;
+  document.getElementById('eSource').style.display=src?'none':'block'; if(!src)ok=false;
+  document.getElementById('eClient').style.display=cid?'none':'block'; if(!cid)ok=false;
+  document.getElementById('eInfo').style.display=info?'none':'block'; if(!info)ok=false;
+  if(!ok) return;
+  const num=Math.max(...applications.map(a=>+a.id.slice(1)))+1;
+  const a={id:'#'+num, title:info.split(/[.\n]/)[0].slice(0,60)||'Заявка', source:src, clientId:cid,
+    information:info, managerId:document.getElementById('nManager').value||null,
+    employeeId:document.getElementById('nEmployee').value||null,
+    objectIds:[...document.querySelectorAll('#nObjects input:checked')].map(i=>i.value),
+    status:'RECEIVED', createdAt:now(), history:[H(now(),'Заявка получена',`Источник: ${src.toLowerCase()}`)]};
+  applications.unshift(a);
+  clientHistory[cid].push({at:now(),action:`Заявка ${a.id} получена · ${src}`});
+  try {
+    const ev = JSON.parse(localStorage.getItem('gavan_client_events')||'[]');
+    ev.push({name: clientById(cid).name, at: now(), action: `Заявка ${a.id} получена · ${src}`});
+    localStorage.setItem('gavan_client_events', JSON.stringify(ev));
+  } catch (e) {}
+  closeNew(); render(); toast(`Заявка ${a.id} создана`);
+};
+function toast(msg,err){
+  const t=document.createElement('div'); t.className='toast';
+  if(err)t.style.background='var(--danger)';
+  t.textContent=msg; document.getElementById('toasts').appendChild(t);
+  setTimeout(()=>t.remove(),2600);
+}
+render();
+</script>
+</body>
+</html>
