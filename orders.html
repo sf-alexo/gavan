@@ -283,7 +283,7 @@ let orderSeq=533;
 
 /* state */
 const today=new Date(2026,9,6);
-let view='week', cursor=new Date(today), suppressClick=false, cur=null;
+let view='week', cursor=new Date(today), suppressUntil=0, resizingNow=false, cur=null;
 const calWrap=document.getElementById('calWrap'), calTitle=document.getElementById('calTitle');
 const q={status:document.getElementById('fStatus'),emp:document.getElementById('fEmp'),mine:document.getElementById('fMine')};
 const GRID_START=7, GRID_END=19, ROWH=44;
@@ -405,13 +405,13 @@ document.getElementById('btnReset').onclick=()=>{q.status.value='';q.emp.value='
 let dragId=null;
 calWrap.addEventListener('dragstart',e=>{
   const c=e.target.closest('[data-id]'); if(!c||!c.classList.contains('evt')&&!c.classList.contains('chip')) return;
-  dragId=+c.dataset.id; suppressClick=true; e.dataTransfer.effectAllowed='move';
+  dragId=+c.dataset.id; suppressUntil=Date.now()+60000; e.dataTransfer.effectAllowed='move';
   requestAnimationFrame(()=>c.classList.add('dragging'));
 });
 calWrap.addEventListener('dragend',e=>{
   e.target.closest('[data-id]')?.classList.remove('dragging');
   document.querySelectorAll('.drop-over').forEach(x=>x.classList.remove('drop-over'));
-  setTimeout(()=>{suppressClick=false;},0);
+  suppressUntil=Date.now()+150; dragId=null;
 });
 calWrap.addEventListener('dragover',e=>{
   const zone=e.target.closest('.wk-day,.mc'); if(!zone) return;
@@ -438,6 +438,7 @@ calWrap.addEventListener('drop',e=>{
   o.end=`${newDate}T${hm(Math.min(startM+dur,24*60-1))}:00`;
   o.history.push({at:nowStr(),who:'Олег Операторов',text:`Заказ перенесён на ${fmtD(new Date(newDate))}, ${hm(startM)}`});
   render(); if(cur===o)openDrawer(o);
+  suppressUntil=Date.now()+150;
 });
 
 /* Resize: изменение длительности */
@@ -447,7 +448,7 @@ calWrap.addEventListener('mousedown',e=>{
   e.preventDefault(); e.stopPropagation();
   const el=h.closest('.evt');
   rzO=orders.find(o=>o.id===+el.dataset.id); rzY=e.clientY; rzH=el.offsetHeight;
-  el.classList.add('resizing'); suppressClick=true;
+  el.classList.add('resizing'); resizingNow=true; suppressUntil=Date.now()+60000;
   const mv=ev=>{
     const dm=Math.round((ev.clientY-rzY)/ROWH*60/30)*30;
     const newEnd=Math.max(mins(rzO.start)+30,mins(rzO.end)+dm);
@@ -461,14 +462,14 @@ calWrap.addEventListener('mousedown',e=>{
     rzO.end=`${rzO.start.slice(0,10)}T${hm(Math.min(newEnd,24*60-1))}:00`;
     rzO.history.push({at:nowStr(),who:'Олег Операторов',text:`Длительность изменена: ${range(rzO)}`});
     render(); if(cur===rzO)openDrawer(rzO);
-    setTimeout(()=>{suppressClick=false;},0);
+    resizingNow=false; suppressUntil=Date.now()+150;
   };
   document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up);
 });
 
 /* клики: событие → drawer, пустое место → создание */
 calWrap.addEventListener('click',e=>{
-  if(suppressClick) return;
+  if(resizingNow||Date.now()<suppressUntil) return;
   const ev=e.target.closest('.evt,.chip,.sch-row');
   if(ev){openDrawer(orders.find(o=>o.id===+ev.dataset.id));return;}
   const zone=e.target.closest('.wk-day,.mc');
@@ -515,14 +516,27 @@ function openDrawer(o){
          ${Object.entries(STATUS).map(([k,[t]])=>`<option value="${k}" ${o.status===k?'selected':''}>${t}</option>`).join('')}
        </select></label>
    </div>
-   <div class="card" style="margin-top:12px"><b>История</b>
-     ${o.history.slice().reverse().map(h=>`<div class="hist-item"><span class="when">${h.at}</span><span><b>${esc(h.text)}</b><div class="c-sub">${esc(h.who)}</div></span></div>`).join('')}
+   <div class="card" style="margin-top:12px"><b>Заметки</b>
+     <div id="dHist">${o.history.slice().reverse().map((h,i)=>`<div class="hist-item"><span class="when">${h.at}</span><span style="flex:1"><b>${esc(h.text)}</b><div class="c-sub">${esc(h.who)}</div></span><span class="h-del" data-i="${o.history.length-1-i}" title="Удалить" style="cursor:pointer;color:var(--muted);padding:0 4px">✕</span></div>`).join('')}</div>
+     <div style="display:flex;gap:8px;margin-top:10px">
+       <input class="input" id="hText" placeholder="Например: подтвердить выезд, позвонить клиенту..." style="flex:1">
+       <span class="btn sm" id="btnHist">Добавить</span>
+     </div>
    </div>`;
   drawer.classList.add('open');backdrop.classList.add('open');
   document.getElementById('dStatus').onchange=e=>{
     const ns=e.target.value;if(ns===o.status)return;
     o.history.push({at:nowStr(),who:'Олег Операторов',text:`Заказ переведён в «${STATUS[ns][0]}»`});
     o.status=ns;render();openDrawer(o);
+  };
+  document.getElementById('btnHist').onclick=()=>{
+    const inp=document.getElementById('hText'), t=inp.value.trim(); if(!t) return;
+    o.history.push({at:nowStr(),who:'Олег Операторов',text:t});
+    render(); openDrawer(o);
+  };
+  document.getElementById('dHist').onclick=e=>{
+    const b=e.target.closest('.h-del'); if(!b) return;
+    o.history.splice(+b.dataset.i,1); render(); openDrawer(o);
   };
   document.getElementById('dEmp').onchange=e=>{
     const v=e.target.value||null;if(v===o.employeeId)return;

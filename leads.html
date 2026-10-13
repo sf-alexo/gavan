@@ -278,6 +278,7 @@ const pushHist = (a,action,details='') => {
   else if (action==='Снят сотрудник') txt = `По заявке ${a.id} снят сотрудник`;
   else if (action==='Добавлен объект') txt = `К заявке ${a.id} добавлен объект «${details}»`;
   else if (action==='Причина потери') txt = `Заявка ${a.id} потеряна. Причина: ${details}`;
+  else if (action==='Заметка') txt = `По заявке ${a.id}: ${details}`;
   if (txt) {
     clientHistory[a.clientId].push({at:now(), action:txt});
     try {
@@ -337,17 +338,17 @@ function resetFilters(){ q.value='';fSource.value='';fManager.value='';fEmployee
 btnReset.onclick=resetFilters; btnReset2.onclick=resetFilters;
 
 /* Drag & drop */
-let dragId=null, suppressClick=false;
+let dragId=null, suppressUntil=0;
 board.addEventListener('dragstart',e=>{
   const c=e.target.closest('.kanban-card'); if(!c) return;
-  dragId=c.dataset.id; suppressClick=true;
+  dragId=c.dataset.id; suppressUntil=Date.now()+60000;
   e.dataTransfer.effectAllowed='move';
   requestAnimationFrame(()=>c.classList.add('dragging'));
 });
 board.addEventListener('dragend',e=>{
   e.target.closest('.kanban-card')?.classList.remove('dragging');
   document.querySelectorAll('.kanban-cards.drop-over').forEach(x=>x.classList.remove('drop-over'));
-  setTimeout(()=>suppressClick=false,0);
+  suppressUntil=Date.now()+150; dragId=null;
 });
 board.addEventListener('dragover',e=>{
   const zone=e.target.closest('.kanban-cards'); if(!zone) return;
@@ -363,16 +364,17 @@ board.addEventListener('drop',e=>{
   const zone=e.target.closest('.kanban-cards'); if(!zone||!dragId) return;
   e.preventDefault(); zone.classList.remove('drop-over');
   const a=applications.find(x=>x.id===dragId); dragId=null;
-  const ns=zone.dataset.s; if(!a||ns===a.status) return;
-  if(ns==='LOST'){ openLost(a); render(); return; }
+  const ns=zone.dataset.s; if(!a||ns===a.status) {suppressUntil=Date.now()+150; return;}
+  if(ns==='LOST'){ openLost(a); render(); suppressUntil=Date.now()+150; return; }
   pushHist(a,'Статус изменён',`${STATUSES[a.status][0]} → ${STATUSES[ns][0]}`);
   a.status=ns;
   if(ns==='WON') toast(`Заявка ${a.id} выиграна`);
   render();
   if(cur===a) openDrawer(a);
+  suppressUntil=Date.now()+150;
 });
 board.addEventListener('click',e=>{
-  if(suppressClick) return;
+  if(Date.now()<suppressUntil) return;
   const c=e.target.closest('.kanban-card'); if(!c) return;
   openDrawer(applications.find(a=>a.id===c.dataset.id));
 });
@@ -433,8 +435,12 @@ function openDrawer(a){
      ${a.status==='WON'?`<a class="btn primary" href="deals.html?from=${a.id.slice(1)}" style="margin-top:10px">Создать сделку →</a>`:''}
    </div>
 
-   <div class="card" style="margin-top:12px"><b>История заявки</b>
-     <div id="dHist">${a.history.slice().reverse().map(h=>`<div class="hist-item"><span class="when">${h.at}</span><span><b>${esc(h.action)}</b>${h.details?`<div class="c-sub">${esc(h.details)}</div>`:''}</span></div>`).join('')}</div>
+   <div class="card" style="margin-top:12px"><b>Заметки</b>
+     <div id="dHist">${a.history.slice().reverse().map((h,i)=>`<div class="hist-item"><span class="when">${h.at}</span><span style="flex:1"><b>${esc(h.action)}</b>${h.details?`<div class="c-sub">${esc(h.details)}</div>`:''}</span><span class="h-del" data-i="${a.history.length-1-i}" title="Удалить" style="cursor:pointer;color:var(--muted);padding:0 4px">✕</span></div>`).join('')}</div>
+     <div style="display:flex;gap:8px;margin-top:10px">
+       <input class="input" id="hText" placeholder="Например: позвонить клиенту, отправить КП..." style="flex:1">
+       <span class="btn sm" id="btnHist">Добавить</span>
+     </div>
    </div>`;
   drawer.classList.add('open'); backdrop.classList.add('open');
 
@@ -455,6 +461,14 @@ function openDrawer(a){
     a.objectIds.push(sel.value);
     pushHist(a,'Добавлен объект',objById(sel.value).name);
     render(); openDrawer(a);
+  };
+  document.getElementById('btnHist').onclick=()=>{
+    const inp=document.getElementById('hText'), t=inp.value.trim(); if(!t) return;
+    pushHist(a,'Заметка',t); render(); openDrawer(a);
+  };
+  document.getElementById('dHist').onclick=e=>{
+    const b=e.target.closest('.h-del'); if(!b) return;
+    a.history.splice(+b.dataset.i,1); render(); openDrawer(a);
   };
   document.getElementById('dStatus').onchange=e=>{
     const ns=e.target.value; if(ns===a.status) return;

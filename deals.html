@@ -249,6 +249,17 @@ const clientById=id=>CLIENTS.find(c=>c.id===id);
 const objById=id=>OBJECTS.find(o=>o.id===id);
 const now=()=>{const d=new Date();return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;};
 const H=(at,who,text)=>({at,who,text});
+const isoD=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const naISO=s=>{if(!s)return'';const t=new Date();
+  if(s==='сегодня')return isoD(t);
+  if(s==='завтра'){t.setDate(t.getDate()+1);return isoD(t);}
+  const m=s.match(/(\d{2})\.(\d{2})\.(\d{4})/);return m?`${m[3]}-${m[2]}-${m[1]}`:'';};
+const fromISO=v=>v?v.split('-').reverse().join('.'):'';
+const naLabel=s=>{if(!s)return'';
+  if(s==='сегодня'||s==='завтра')return s;
+  const iso=naISO(s); if(!iso)return s;
+  const t=new Date(),tmr=new Date(); tmr.setDate(t.getDate()+1);
+  return iso===isoD(t)?'сегодня':iso===isoD(tmr)?'завтра':s;};
 const money=n=>n?n.toLocaleString('ru-RU')+' ₽':'—';
 
 let ordersSeq = 504;
@@ -316,7 +327,7 @@ const card=d=>{
     ${objs.length?`<div class="c-sub">${esc(objs[0])}${objs.length>1?` + ${objs.length-1} объект`:''}</div>`:''}
     <div class="amount">${money(d.amount)}${d.amountPeriod||''}</div>
     <div class="c-sub">${d.managerId||'Менеджер не назначен'} · Заказы: ${d.orders.length}</div>
-    ${d.nextAction?`<div class="next">→ ${esc(d.nextAction)}<span style="float:right">${esc(d.nextActionDate||'')}</span></div>`:''}
+    ${d.nextAction?`<div class="next">→ ${esc(d.nextAction)}<span style="float:right">${esc(naLabel(d.nextActionDate))}</span></div>`:''}
     ${d.status==='lost'?`<div class="next" style="background:#fef2f2;border-color:#fca5a5;color:#991b1b">Причина: ${REASONS[d.lostReason]||''}</div>`:''}
   </div>`;
 };
@@ -348,16 +359,16 @@ document.getElementById('sum').addEventListener('click',e=>{
 });
 
 /* Drag & drop */
-let dragId=null,suppressClick=false;
+let dragId=null,suppressUntil=0;
 board.addEventListener('dragstart',e=>{
   const c=e.target.closest('.kanban-card'); if(!c) return;
-  dragId=+c.dataset.id; suppressClick=true; e.dataTransfer.effectAllowed='move';
+  dragId=+c.dataset.id; suppressUntil=Date.now()+60000; e.dataTransfer.effectAllowed='move';
   requestAnimationFrame(()=>c.classList.add('dragging'));
 });
 board.addEventListener('dragend',e=>{
   e.target.closest('.kanban-card')?.classList.remove('dragging');
   document.querySelectorAll('.kanban-cards.drop-over').forEach(x=>x.classList.remove('drop-over'));
-  setTimeout(()=>suppressClick=false,0);
+  suppressUntil=Date.now()+150; dragId=null;
 });
 board.addEventListener('dragover',e=>{
   const zone=e.target.closest('.kanban-cards'); if(!zone) return;
@@ -373,11 +384,12 @@ board.addEventListener('drop',e=>{
   const zone=e.target.closest('.kanban-cards'); if(!zone||dragId==null) return;
   e.preventDefault(); zone.classList.remove('drop-over');
   const d=deals.find(x=>x.id===dragId); dragId=null;
-  const ns=zone.dataset.s; if(!d||ns===d.status) return;
+  const ns=zone.dataset.s; if(!d||ns===d.status) {suppressUntil=Date.now()+150; return;}
   setStage(d,ns);
+  suppressUntil=Date.now()+150;
 });
 board.addEventListener('click',e=>{
-  if(suppressClick) return;
+  if(Date.now()<suppressUntil) return;
   const c=e.target.closest('.kanban-card'); if(!c) return;
   openDrawer(deals.find(d=>d.id===+c.dataset.id));
 });
@@ -416,11 +428,6 @@ function openDrawer(d){
       </div>
       <button class="drawer-close" onclick="closeDrawer()">✕</button>
     </div>
-    ${active?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-      <span class="btn sm" id="dDone">Завершить сделку</span>
-      <span class="btn sm" id="dLose" style="color:var(--danger)">Потерять сделку</span>
-      <button class="btn sm" onclick="toast('Редактирование — в разработке')">⋯</button>
-    </div>`:''}
    </div>
 
    <div class="card" style="margin-top:12px"><b>Основная информация</b>
@@ -428,9 +435,16 @@ function openDrawer(d){
      ${d.applicationId?`<div class="kv"><b>Источник:</b> создана из <a href="leads.html">заявки #${d.applicationId}</a></div>`:''}
      <div class="kv"><b>Менеджер:</b> ${d.managerId||'—'}</div>
      <div class="kv"><b>Дата создания:</b> ${d.createdAt}</div>
-     ${d.nextAction?`<div class="kv"><b>Следующее действие:</b> ${esc(d.nextAction)} <span class="c-sub">${esc(d.nextActionDate||'')}</span></div>`:''}
+     ${!active&&d.nextAction?`<div class="kv"><b>Следующее действие:</b> ${esc(d.nextAction)} <span class="c-sub">${esc(naLabel(d.nextActionDate))}</span></div>`:''}
      ${d.status==='lost'?`<div class="kv"><b>Причина потери:</b> ${REASONS[d.lostReason]||'—'}</div>`:''}
    </div>
+
+   ${active?`<div class="card" style="margin-top:12px"><b>Следующее действие</b>
+     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+       <input class="input" id="naText" value="${esc(d.nextAction||'')}" placeholder="Например: позвонить клиенту" style="flex:1;min-width:180px">
+       <input class="input" type="date" id="naDate" value="${naISO(d.nextActionDate)}" style="width:150px">
+       <span class="btn sm primary" id="btnNaDone" title="Отметить выполненным">Выполнено</span>
+     </div></div>`:''}
 
    <div class="card" style="margin-top:12px"><b>Условия сделки</b>
      <div class="kv" style="margin-top:8px"><b>Услуга:</b> ${esc(d.service||'—')}</div>
@@ -459,8 +473,13 @@ function openDrawer(d){
        </select></label>
    </div>
 
-   <div class="card" style="margin-top:12px"><b>История</b>
-     ${d.history.slice().reverse().map(h=>`<div class="hist-item"><span class="when">${h.at}</span><span><b>${esc(h.text)}</b><div class="c-sub">${esc(h.who)}</div></span></div>`).join('')}
+   <div class="card" style="margin-top:12px"><b>Заметки</b>
+     <div id="dHist">${d.history.slice().reverse().map((h,i)=>`<div class="hist-item"><span class="when">${h.at}</span><span style="flex:1"><b>${esc(h.text)}</b><div class="c-sub">${esc(h.who)}</div></span><span class="h-del" data-i="${d.history.length-1-i}" title="Удалить" style="cursor:pointer;color:var(--muted);padding:0 4px">✕</span></div>`).join('')}</div>
+     <div style="display:flex;gap:8px;margin-top:10px">
+       <input class="input" id="hText" placeholder="Например: отправить КП, позвонить клиенту..." style="flex:1">
+       <span class="btn sm" id="btnHist">Добавить</span>
+     </div>
+     <div class="c-sub" style="margin-top:6px">Последняя запись отображается на карточке как следующее действие</div>
    </div>`;
   drawer.classList.add('open'); backdrop.classList.add('open');
 
@@ -469,6 +488,29 @@ function openDrawer(d){
     if(ns==='lost'||ns==='completed'){ e.target.value=d.status; setStage(d,ns); return; }
     setStage(d,ns);
   };
+  document.getElementById('btnHist').onclick=()=>{
+    const inp=document.getElementById('hText'), t=inp.value.trim(); if(!t) return;
+    const h=H(now(),'Елена Менеджерова',t); h.note=true; d.history.push(h);
+    clientEvent(d,`По сделке #${d.id}: ${t}`);
+    if(d.status!=='completed'&&d.status!=='lost'){ d.nextAction=t; d.nextActionDate='сегодня'; }
+    render(); openDrawer(d);
+  };
+  document.getElementById('dHist').onclick=e=>{
+    const b=e.target.closest('.h-del'); if(!b) return;
+    d.history.splice(+b.dataset.i,1);
+    const lastNote=[...d.history].reverse().find(h=>h.note);
+    if(lastNote&&d.status!=='completed'&&d.status!=='lost'){ d.nextAction=lastNote.text; d.nextActionDate='сегодня'; }
+    render(); openDrawer(d);
+  };
+  document.getElementById('naText')?.addEventListener('change',e=>{d.nextAction=e.target.value.trim();render();});
+  document.getElementById('naDate')?.addEventListener('change',e=>{d.nextActionDate=fromISO(e.target.value);render();});
+  document.getElementById('btnNaDone')?.addEventListener('click',()=>{
+    if(!d.nextAction) return;
+    d.history.push(H(now(),'Елена Менеджерова',`Выполнено: ${d.nextAction}`));
+    clientEvent(d,`По сделке #${d.id} выполнено: ${d.nextAction}`);
+    d.nextAction=''; d.nextActionDate='';
+    render(); openDrawer(d); toast('Действие выполнено — запись добавлена в историю');
+  });
   document.getElementById('dDone')?.addEventListener('click',()=>openDone(d));
   document.getElementById('dLose')?.addEventListener('click',()=>openLost(d));
   document.getElementById('dNewOrder')?.addEventListener('click',()=>{

@@ -205,6 +205,7 @@ function detail(c){
 }
 const badge = (t,cls)=>`<span class="badge ${cls}">${t}</span>`;
 const esc = s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const now=()=>{const d=new Date();return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;};
 /* События из раздела «Заявки» (leads.html) → история клиента */
 function clientHist(c,d){
   let ev=[];
@@ -346,7 +347,21 @@ function renderTab(c){
       <tbody>${d.orders.map(o=>`<tr style="cursor:default"><td><b>${o.num}</b></td><td>${esc(o.service)}</td><td>${esc(o.obj)}</td><td>${o.date}</td><td>${badge(o.status,OSTATUS[o.status])}</td></tr>`).join('')}</tbody></table>`
       :'<span class="c-sub">Нет заказов</span>'}</div>`;
   } else {
-    p.innerHTML = `<div class="card">${clientHist(c,d).map(([w,a])=>`<div class="hist-item"><span class="when">${esc(w)}</span><span>${esc(a)}</span></div>`).join('')||'<span class="c-sub">Пусто</span>'}</div>`;
+    p.innerHTML = `<div class="card">
+      ${clientHist(c,d).map(([w,a])=>`<div class="hist-item"><span class="when">${esc(w)}</span><span>${esc(a)}</span></div>`).join('')||'<span class="c-sub">Пусто</span>'}
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input class="input" id="hText" placeholder="Добавить событие: звонок, письмо, встреча..." style="flex:1">
+        <span class="btn sm" id="btnHist">Добавить</span>
+      </div></div>`;
+    document.getElementById('btnHist').onclick=()=>{
+      const inp=document.getElementById('hText'), t=inp.value.trim(); if(!t) return;
+      try{
+        const ev=JSON.parse(localStorage.getItem('gavan_client_events')||'[]');
+        ev.push({name:c.name,at:now(),action:t});
+        localStorage.setItem('gavan_client_events',JSON.stringify(ev));
+      }catch(e){}
+      renderTab(c);
+    };
   }
 }
 
