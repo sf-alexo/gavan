@@ -60,38 +60,43 @@
   .sch-row:hover { background: #f8fafc; }
 
   /* Цвета статусов (bg|fg) задаются инлайном из JS */
+
+  /* Чек-лист-аккордеон */
+  .cl-item { border-bottom:1px solid var(--border); }
+  .cl-item:last-child { border-bottom:none; }
+  .cl-head { display:flex; gap:8px; align-items:center; padding:8px 0; cursor:pointer; }
+  .cl-head .cl-title { flex:1; min-width:0; font-size:13px; }
+  .cl-head .badge { width:88px; text-align:center; flex-shrink:0; }
+  .cl-head .btn { flex-shrink:0; }
+  .cl-caret { color:var(--muted); font-size:12px; transition:transform .15s; }
+  .cl-item.open .cl-caret { transform:rotate(180deg); }
+  .cl-body { display:none; padding:0 0 12px; }
+  .cl-item.open .cl-body { display:block; }
+  .cl-note { width:100%; box-sizing:border-box; resize:vertical; }
+  .cl-photos { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .cl-ph { position:relative; width:72px; height:72px; }
+  .cl-ph img { width:100%; height:100%; object-fit:cover; border-radius:8px; border:1px solid var(--border); }
+  .cl-ph-x { position:absolute; top:-6px; right:-6px; width:18px; height:18px; border-radius:50%; border:0; background:#111827; color:#fff; font-size:10px; line-height:1; padding:0; cursor:pointer; }
+  .cl-addph { margin-top:8px; cursor:pointer; display:inline-block; }
 </style>
 </head>
 <body>
-<div class="mock-note">
-  <a href="index.html">← Все мокапы</a>
-  <span>Экран: Заказы — календарь (день/неделя/месяц/расписание, drag-and-drop) · Демо-данные, интерактивный mockup (JS)</span>
-</div>
 <input class="navtoggle" id="navtoggle" type="checkbox">
 <div class="layout">
   <aside class="sidebar">
     <div class="brand">Gavan CRM <label class="side-close" for="navtoggle" title="Свернуть меню">«</label></div>
     <nav>
-      <a href="index.html">← Схема процесса</a>
+      <a href="map.html">← Схема процесса</a>
       <a href="login.html">Вход</a>
       <a href="dashboard.html">Дашборд</a>
       <a href="clients.html">Клиенты</a>
+      <a href="objects.html">Объекты</a>
       <a href="leads.html">Заявки</a>
       <a href="deals.html">Сделки</a>
       <a href="orders.html" class="active">Заказы</a>
-      <a href="order-assign.html">Заказ: назначение</a>
-      <a href="order-work.html">Заказ: уборка</a>
-      <a href="order-quality.html">Заказ: проверка</a>
-      <a href="scan.html">QR-скан</a>
-      <a href="client-cabinet.html">Кабинет клиента</a>
       <a href="tasks.html">Задачи</a>
       <a href="history.html">История</a>
     </nav>
-    <div class="user-block">
-      <div>Олег Операторов</div>
-      <div style="opacity:.7">OPERATOR</div>
-      <span class="btn sm" style="margin-top:8px">Выйти</span>
-    </div>
   </aside>
   <div class="main">
     <div class="topbar">
@@ -109,8 +114,8 @@
         </details>
         <details class="dd">
           <summary>
-            <span class="avatar">ОО</span>
-            <span class="u-meta"><b>Олег Операторов</b><i>OPERATOR</i></span>
+            <span class="avatar">ЕМ</span>
+            <span class="u-meta"><b>Елена Менеджерова</b><i>Менеджер</i></span>
             <span style="color:var(--muted)">▾</span>
           </summary>
           <div class="dd-menu">
@@ -161,8 +166,9 @@
   </div>
 </div>
 
-<div class="drawer-backdrop" id="backdrop"></div>
-<aside class="drawer" id="drawer"></aside>
+<div class="modal-backdrop" id="backdrop" style="display:none">
+  <div class="modal" id="drawer" role="dialog" aria-modal="true" style="max-width:960px"></div>
+</div>
 
 <div class="modal-backdrop" id="modalNew" style="display:none">
   <div class="modal" style="max-width:560px">
@@ -436,7 +442,7 @@ calWrap.addEventListener('drop',e=>{
   }
   o.start=`${newDate}T${hm(startM)}:00`;
   o.end=`${newDate}T${hm(Math.min(startM+dur,24*60-1))}:00`;
-  o.history.push({at:nowStr(),who:'Олег Операторов',text:`Заказ перенесён на ${fmtD(new Date(newDate))}, ${hm(startM)}`});
+  o.history.push({at:nowStr(),who:'Елена Менеджерова',text:`Заказ перенесён на ${fmtD(new Date(newDate))}, ${hm(startM)}`});
   render(); if(cur===o)openDrawer(o);
   suppressUntil=Date.now()+150;
 });
@@ -460,7 +466,7 @@ calWrap.addEventListener('mousedown',e=>{
     const dm=Math.round((ev.clientY-rzY)/ROWH*60/30)*30;
     const newEnd=Math.max(mins(rzO.start)+30,mins(rzO.end)+dm);
     rzO.end=`${rzO.start.slice(0,10)}T${hm(Math.min(newEnd,24*60-1))}:00`;
-    rzO.history.push({at:nowStr(),who:'Олег Операторов',text:`Длительность изменена: ${range(rzO)}`});
+    rzO.history.push({at:nowStr(),who:'Елена Менеджерова',text:`Длительность изменена: ${range(rzO)}`});
     render(); if(cur===rzO)openDrawer(rzO);
     resizingNow=false; suppressUntil=Date.now()+150;
   };
@@ -485,9 +491,16 @@ calWrap.addEventListener('click',e=>{
 });
 
 /* Drawer */
+const CL_ITEMS=[
+ {t:'Полы вымыты во всех помещениях',n:'Моющее средство стандартное, разводов нет',p:['images/images.jpeg']},
+ {t:'Санузлы продезинфицированы',n:'',p:['images/images%20(1).jpeg']},
+ {t:'Мусор вынесен, корзины заменены',n:'',p:['images/k1-KkpYWH2Lz2S078hSmm6Gwx_gYReMmOkTLny9hS9ko-gRtyNGDXjhFqVM349k_YzEJoTHWzrpfQP0DNmgblr3D.jpg']},
+ {t:'Стёкла и зеркала без разводов',n:'',p:[]},
+ {t:'Кухня: поверхности и мойка',n:'',p:[]},
+];
 const drawer=document.getElementById('drawer'),backdrop=document.getElementById('backdrop');
-function closeDrawer(){drawer.classList.remove('open');backdrop.classList.remove('open');cur=null;}
-backdrop.onclick=closeDrawer;
+function closeDrawer(){backdrop.style.display='none';cur=null;}
+backdrop.onclick=e=>{if(e.target===backdrop)closeDrawer();};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeNew();}});
 function openDrawer(o){
   cur=o;const cl=clientById(o.clientId);
@@ -502,8 +515,16 @@ function openDrawer(o){
     </div>
    </div>
    <div class="card" style="margin-top:12px">
+     <div class="timeline">
+       ${['Создан','Запланирован','В работе','Проверка качества','Завершён'].map((t,i)=>{
+         const done={scheduled:2,confirmed:2,in_progress:3,completed:5,cancelled:1}[o.status];
+         return `<div class="timeline-step${i<done?' done':''}"><div class="dot"></div><div class="label">${t}</div></div>`;
+       }).join('')}
+     </div>
+   </div>
+   <div class="card" style="margin-top:12px">
      <div class="kv"><b>Клиент:</b> <a href="clients.html">${esc(cl.name)}</a></div>
-     <div class="kv"><b>Объект:</b> ${esc(objById(o.objectId).name)}</div>
+     <div class="kv"><b>Объект:</b> <a href="objects.html">${esc(objById(o.objectId).name)}</a></div>
      ${o.dealId?`<div class="kv"><b>Сделка:</b> <a href="deals.html">#${o.dealId}</a></div>`:''}
      <div class="kv"><b>Дата:</b> ${fmtD(new Date(o.start.slice(0,10)+'T00:00'))}</div>
      <div class="kv"><b>Время:</b> ${range(o)}</div>
@@ -516,6 +537,29 @@ function openDrawer(o){
          ${Object.entries(STATUS).map(([k,[t]])=>`<option value="${k}" ${o.status===k?'selected':''}>${t}</option>`).join('')}
        </select></label>
    </div>
+   <div class="card" style="margin-top:12px"><b>Чек-лист</b>
+     <div style="margin-top:6px">${CL_ITEMS.map((it,i)=>{
+       const done=o.status==='completed'||o.status==='in_progress'&&i<3;
+       return `<div class="cl-item" data-s="${done?'PASSED':'PENDING'}">
+         <div class="cl-head"><span class="badge ${done?'green':'gray'}">${done?'Выполнен':'Ожидает'}</span><span class="cl-title">${it.t}</span>
+           <span class="cl-caret">▾</span></div>
+         <div class="cl-body">
+           ${done&&it.n?`<div style="font-size:13px;margin-bottom:6px">${esc(it.n)}</div>`:''}
+           <div class="cl-photos">${done?it.p.map(src=>`<span class="cl-ph"><img src="${src}" alt="Фото"></span>`).join(''):''}</div>
+           ${done&&!it.n&&!it.p.length?'<div class="c-sub">Нет комментариев и фото</div>':''}
+         </div>
+       </div>`;
+     }).join('')}</div>
+   </div>
+   <div class="card" style="margin-top:12px"><b>Контроль качества</b>
+     <label class="field" style="margin-top:8px"><span>Комментарий QA</span>
+       <textarea class="input" id="qaText" rows="2" placeholder="Обязателен при отклонении"></textarea></label>
+     <div style="display:flex;gap:8px;margin-top:8px">
+       <span class="btn primary" id="qaAccept" style="flex:1">Принять</span>
+       <span class="btn danger" id="qaReject" style="flex:1">Отклонить</span>
+     </div>
+     <span class="btn primary" id="qaDone" style="display:block;text-align:center;margin-top:10px">Завершить заказ</span>
+   </div>
    <div class="card" style="margin-top:12px"><b>Заметки</b>
      <div id="dHist">${o.history.slice().reverse().map((h,i)=>`<div class="hist-item"><span class="when">${h.at}</span><span style="flex:1"><b>${esc(h.text)}</b><div class="c-sub">${esc(h.who)}</div></span><span class="h-del" data-i="${o.history.length-1-i}" title="Удалить" style="cursor:pointer;color:var(--muted);padding:0 4px">✕</span></div>`).join('')}</div>
      <div style="display:flex;gap:8px;margin-top:10px">
@@ -523,15 +567,15 @@ function openDrawer(o){
        <span class="btn sm" id="btnHist">Добавить</span>
      </div>
    </div>`;
-  drawer.classList.add('open');backdrop.classList.add('open');
+  backdrop.style.display='flex';
   document.getElementById('dStatus').onchange=e=>{
     const ns=e.target.value;if(ns===o.status)return;
-    o.history.push({at:nowStr(),who:'Олег Операторов',text:`Заказ переведён в «${STATUS[ns][0]}»`});
+    o.history.push({at:nowStr(),who:'Елена Менеджерова',text:`Заказ переведён в «${STATUS[ns][0]}»`});
     o.status=ns;render();openDrawer(o);
   };
   document.getElementById('btnHist').onclick=()=>{
     const inp=document.getElementById('hText'), t=inp.value.trim(); if(!t) return;
-    o.history.push({at:nowStr(),who:'Олег Операторов',text:t});
+    o.history.push({at:nowStr(),who:'Елена Менеджерова',text:t});
     render(); openDrawer(o);
   };
   document.getElementById('dHist').onclick=e=>{
@@ -541,7 +585,25 @@ function openDrawer(o){
   document.getElementById('dEmp').onchange=e=>{
     const v=e.target.value||null;if(v===o.employeeId)return;
     o.employeeId=v;
-    o.history.push({at:nowStr(),who:'Олег Операторов',text:v?`Назначен исполнитель ${v}`:'Исполнитель снят'});
+    o.history.push({at:nowStr(),who:'Елена Менеджерова',text:v?`Назначен исполнитель ${v}`:'Исполнитель снят'});
+    render();openDrawer(o);
+  };
+  drawer.querySelectorAll('.cl-item').forEach(r=>{
+    r.querySelector('.cl-head').onclick=()=>r.classList.toggle('open');
+  });
+  document.getElementById('qaAccept').onclick=()=>{
+    o.history.push({at:nowStr(),who:'Елена Менеджерова',text:'Контроль качества: принято'});
+    render();openDrawer(o);
+  };
+  document.getElementById('qaReject').onclick=()=>{
+    const c=document.getElementById('qaText').value.trim();
+    o.status='in_progress';
+    o.history.push({at:nowStr(),who:'Елена Менеджерова',text:'Проверка не пройдена — возврат в работу'+(c?`: ${c}`:'')});
+    render();openDrawer(o);
+  };
+  document.getElementById('qaDone').onclick=()=>{
+    o.status='completed';
+    o.history.push({at:nowStr(),who:'Елена Менеджерова',text:'Заказ завершён'});
     render();openDrawer(o);
   };
 }
@@ -598,7 +660,7 @@ document.getElementById('btnCreate').onclick=()=>{
     orders.push({id:orderSeq++,clientId:cid,dealId:oDeal.value?+oDeal.value:undefined,objectId:oid,
       service:svc,start:`${dd}T${st}:00`,end:`${dd}T${en}:00`,status:oStatus.value,
       employeeId:oEmp.value||null,comment:oComment.value.trim(),
-      history:[{at:nowStr(),who:'Олег Операторов',text:'Заказ создан'}]});
+      history:[{at:nowStr(),who:'Елена Менеджерова',text:'Заказ создан'}]});
   });
   closeNew();render();
   toast(dates.length>1?`Создано заказов: ${dates.length}`:`Заказ создан на ${fmtD(new Date(dt+'T00:00'))} ${st}`);

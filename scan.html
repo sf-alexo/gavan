@@ -5,43 +5,68 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>QR-скан — мокап</title>
 <link rel="stylesheet" href="styles.css">
+<style>
+  .p-nav { display: flex; border-top: 1px solid var(--border); background: var(--panel); }
+  .p-nav a { flex: 1; text-align: center; padding: 10px 4px; font-size: 11px; color: var(--muted); text-decoration: none; }
+  .p-nav a.on { color: var(--primary); font-weight: 700; }
+  .p-nav a span { display: block; font-size: 16px; margin-bottom: 2px; }
+  .qr-box { position:relative; overflow:hidden; }
+  .qr-box .scan-line { position:absolute; left:12%; right:12%; height:2px; border-radius:2px;
+    background:linear-gradient(90deg, transparent, var(--primary), transparent);
+    box-shadow:0 0 8px var(--primary); animation:scanline 1.6s ease-in-out infinite; }
+  @keyframes scanline { 0%,100% { top:14%; } 50% { top:82%; } }
+  .scan-result { display:none; }
+  .qr-box.done .scan-line { display:none; }
+</style>
 </head>
 <body>
-<div class="mock-note">
-  <a href="index.html">← Все мокапы</a>
-  <span>Шаг 4: сотрудник сканирует QR объекта (publicId) · Экран «QR-скан» · Роль: EMPLOYEE · Демо-данные</span>
-</div>
 <div class="phone-wrap">
   <div class="phone">
-    <div class="p-top"><span>09:01</span><span>Gavan CRM</span><span>Игорь С.</span></div>
+    <div class="p-top"><span>09:42</span><span>Gavan CRM</span><span>Игорь С.</span></div>
     <div class="p-body">
-      <h3 style="margin-top:0">QR-скан объекта</h3>
-      <div class="qr-box">
-        📷 &nbsp;Наведите камеру на QR-код объекта<br>
+      <a href="order-work.html" style="font-size:13px">← Заказ</a>
+      <h3 style="margin:10px 0 12px">QR-скан объекта</h3>
+
+      <div class="qr-box" id="qrBox">
+        <div class="scan-line"></div>
+        📷 &nbsp;<span id="scanLabel">Наведите камеру на QR-код объекта…</span><br>
         <span style="font-size:11px">наклейка у входа / в кладовой</span>
       </div>
-      <div style="text-align:center; color:var(--muted); font-size:12px; margin-bottom:16px">— код распознан —</div>
+      <div style="text-align:center; color:var(--muted); font-size:12px; margin-bottom:16px" id="scanStatus">сканирование…</div>
 
-      <div class="card" style="padding:14px; margin-bottom:12px">
-        <div style="font-size:12px; color:var(--muted)">Объект · <code>pub-obj-3</code></div>
-        <b>Склад «Вектра», Северный р-н</b>
-        <div style="font-size:13px; color:var(--muted); margin-top:4px">пр. Индустриальный 42, ворота 2</div>
+      <div class="scan-result" id="scanResult">
+        <div class="card" style="padding:14px; margin-bottom:12px">
+          <div style="font-size:12px; color:var(--muted)">Объект · <code>pub-obj-15</code></div>
+          <b>БЦ «Меркурий», оф. 402</b>
+          <div style="font-size:13px; color:var(--muted); margin-top:4px">ул. Центральная, 12</div>
+        </div>
+
+        <div class="card" style="padding:14px; border-color:var(--primary)">
+          <div style="font-size:12px; color:var(--muted)">Ваш заказ на этот объект</div>
+          <div style="font-size:16px; font-weight:700; margin:4px 0">ORD-SEED-001 <span class="badge blue">Назначен</span></div>
+          <div style="font-size:13px">Генеральная уборка офиса · 09:00–15:00</div>
+          <div style="font-size:13px; color:var(--muted); margin-top:4px">Чек-лист: 5 пунктов</div>
+          <a class="btn primary" href="order-work.html?started=1" style="display:block; width:100%; text-align:center; margin-top:12px; box-sizing:border-box">Начать работу</a>
+        </div>
       </div>
-
-      <div class="card" style="padding:14px; border-color:var(--primary)">
-        <div style="font-size:12px; color:var(--muted)">Ваш заказ на сегодня</div>
-        <div style="font-size:16px; font-weight:700; margin:4px 0">ORD-SEED-003 <span class="badge blue">ASSIGNED</span></div>
-        <div style="font-size:13px">Уборка склада · 08:00–14:00</div>
-        <div style="font-size:13px; color:var(--muted); margin-top:4px">Чек-лист: 4 пункта</div>
-        <a class="btn primary" href="order-quality.html" style="width:100%; text-align:center; margin-top:12px">Начать работу</a>
-      </div>
-
-      <p style="font-size:11px; color:var(--muted); margin-top:14px">
-        Сканирование <code>publicId</code> находит заказ сотрудника на этот объект.
-        Чужие заказы и внутренние данные (цена, контакты клиента) сотруднику не показываются.
-      </p>
     </div>
+    <nav class="p-nav">
+      <a href="order-work.html"><span>✓</span>Заказ</a>
+      <a href="calendar.html"><span>◷</span>Календарь</a>
+      <a href="login.html"><span>⎋</span>Выйти</a>
+    </nav>
   </div>
 </div>
+<script>
+setTimeout(()=>{
+  document.getElementById('qrBox').classList.add('done');
+  document.getElementById('scanLabel').textContent='QR-код распознан';
+  const s=document.getElementById('scanStatus');
+  s.textContent='— pub-obj-15 —';
+  s.style.color='var(--green, #16a34a)';
+  const r=document.getElementById('scanResult');
+  r.style.display='block';
+},2200);
+</script>
 </body>
 </html>

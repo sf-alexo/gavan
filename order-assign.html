@@ -7,36 +7,19 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="mock-note">
-  <a href="index.html">← Все мокапы</a>
-  <span>Шаг 3: заказ создан из WON-сделки, статус ASSIGNED · Роль: OPERATOR · Демо-данные</span>
-</div>
 <input class="navtoggle" id="navtoggle" type="checkbox">
 <div class="layout">
   <aside class="sidebar">
     <div class="brand">Gavan CRM <label class="side-close" for="navtoggle" title="Свернуть меню">«</label></div>
     <nav>
-      <a href="index.html">← Схема процесса</a>
+      <a href="map.html">← Схема процесса</a>
       <a href="login.html">Вход</a>
-      <a href="dashboard.html">Дашборд</a>
-      <a href="clients.html">Клиенты</a>
-      <a href="leads.html">Заявки</a>
-      <a href="deals.html">Сделки</a>
-      <a href="orders.html">Заказы</a>
+      <a href="scan.html">QR-скан</a>
       <a href="order-assign.html" class="active">Заказ: назначение</a>
       <a href="order-work.html">Заказ: уборка</a>
       <a href="order-quality.html">Заказ: проверка</a>
-      <a href="calendar.html">Календарь</a>
-      <a href="scan.html">QR-скан</a>
-      <a href="client-cabinet.html">Кабинет клиента</a>
-      <a href="tasks.html">Задачи</a>
-      <a href="history.html">История</a>
+      <a href="calendar.html">Мой календарь</a>
     </nav>
-    <div class="user-block">
-      <div>Олег Операторов</div>
-      <div style="opacity:.7">OPERATOR</div>
-      <span class="btn sm" style="margin-top:8px">Выйти</span>
-    </div>
   </aside>
   <div class="main">
     <div class="topbar">
@@ -54,8 +37,8 @@
         </details>
         <details class="dd">
           <summary>
-            <span class="avatar">ОО</span>
-            <span class="u-meta"><b>Олег Операторов</b><i>OPERATOR</i></span>
+            <span class="avatar">ИС</span>
+            <span class="u-meta"><b>Игорь Серов</b><i>Сотрудник</i></span>
             <span style="color:var(--muted)">▾</span>
           </summary>
           <div class="dd-menu">
@@ -67,7 +50,7 @@
       </div>
     </div>
     <div class="content">
-      <h2>ORD-SEED-002 <span class="badge blue">ASSIGNED</span></h2>
+      <h2>ORD-SEED-002 <span class="badge blue">Назначен</span></h2>
 
       <div class="card" style="margin-bottom:16px">
         <div class="timeline">
@@ -95,9 +78,9 @@
 
           <div class="card">
             <h3 style="margin-top:0">Чек-лист</h3>
-            <div style="display:flex; gap:8px; align-items:center; padding:6px 0"><span class="badge gray">PENDING</span><span>Окна вымыты с двух сторон</span></div>
-            <div style="display:flex; gap:8px; align-items:center; padding:6px 0"><span class="badge gray">PENDING</span><span>Рамы и подоконники протёрты</span></div>
-            <div style="display:flex; gap:8px; align-items:center; padding:6px 0"><span class="badge gray">PENDING</span><span>Мусор вынесен, инвентарь собран</span></div>
+            <div style="display:flex; gap:8px; align-items:center; padding:6px 0"><span class="badge gray">Ожидает</span><span>Окна вымыты с двух сторон</span></div>
+            <div style="display:flex; gap:8px; align-items:center; padding:6px 0"><span class="badge gray">Ожидает</span><span>Рамы и подоконники протёрты</span></div>
+            <div style="display:flex; gap:8px; align-items:center; padding:6px 0"><span class="badge gray">Ожидает</span><span>Мусор вынесен, инвентарь собран</span></div>
             <p style="color:var(--muted); font-size:12px">Отметки появятся после начала работ — см. <a href="order-work.html">этап «Уборка»</a>.</p>
           </div>
         </div>

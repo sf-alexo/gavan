@@ -3,105 +3,31 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Чистая Гавань — мокапы бизнес-процессов</title>
+<title>Вход — Gavan CRM</title>
 <link rel="stylesheet" href="styles.css">
+<style>
+.auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); }
+.auth-card { width: 360px; }
+.auth-card h1 { font-size: 22px; margin-bottom: 4px; }
+</style>
 </head>
 <body>
-<div class="mock-note">
-  <span>Статические мокапы экранов — только HTML/CSS, без бэкенда. Данные демонстрационные (совпадают с демо-сидом).</span>
-</div>
-<div class="page" style="max-width:1180px">
-  <h1>«Чистая Гавань» — мокапы бизнес-процессов</h1>
-  <p style="color:var(--muted); max-width:720px">
-    Основной сценарий CRM: заявка → клиент → сделка → заказ → назначение исполнителя →
-    QR объекта → выполнение по чек-листу → контроль качества → завершение → кабинет клиента.
-    Каждый экран ниже — отдельный HTML-файл, открывается в браузере без сервера.
-  </p>
-
-  <h2>Основной workflow</h2>
-  <div class="flow">
-    <a class="step" href="login.html">
-      <div class="n">ШАГ 0 · ВСЕ РОЛИ</div>
-      <div class="t">Вход в CRM</div>
-      <div class="d">JWT-логин сотрудника, возврат на исходный URL</div>
-    </a>
-    <span class="arrow">→</span>
-    <a class="step" href="leads.html">
-      <div class="n">ШАГ 1 · MANAGER</div>
-      <div class="t">Заявка</div>
-      <div class="d">Входящий запрос: источник, клиент, объекты, обработка → выиграна / потеряна</div>
-    </a>
-    <span class="arrow">→</span>
-    <a class="step" href="deals.html">
-      <div class="n">ШАГ 2 · MANAGER</div>
-      <div class="t">Сделка</div>
-      <div class="d">NEW → QUALIFICATION → CALCULATION → PROPOSAL → WON</div>
-    </a>
-    <span class="arrow">→</span>
-    <a class="step" href="order-assign.html">
-      <div class="n">ШАГ 3 · OPERATOR</div>
-      <div class="t">Заказ + назначение</div>
-      <div class="d">Создан из WON-сделки, планирование, сотрудник/бригада</div>
-    </a>
-    <span class="arrow">→</span>
-    <a class="step" href="scan.html">
-      <div class="n">ШАГ 4 · EMPLOYEE</div>
-      <div class="t">QR на объекте</div>
-      <div class="d">Скан publicId → заказ на сегодня → «Начать работу»</div>
-    </a>
-    <span class="arrow">→</span>
-    <a class="step" href="order-work.html">
-      <div class="n">ШАГ 5 · EMPLOYEE</div>
-      <div class="t">Уборка + чек-лист</div>
-      <div class="d">Стадии STARTED → CLEANING, пункты PASSED/FAILED</div>
-    </a>
-    <span class="arrow">→</span>
-    <a class="step" href="order-quality.html">
-      <div class="n">ШАГ 6 · OPERATOR</div>
-      <div class="t">Контроль качества</div>
-      <div class="d">Принять / отклонить → завершение заказа</div>
-    </a>
-    <span class="arrow">→</span>
-    <a class="step" href="client-cabinet.html">
-      <div class="n">ШАГ 7 · КЛИЕНТ</div>
-      <div class="t">Кабинет клиента</div>
-      <div class="d">Статус заказа, фото, документы, история уборок</div>
-    </a>
-  </div>
-
-  <h2 style="margin-top:32px">Вспомогательные экраны CRM</h2>
-  <div class="grid cols-3">
-    <a class="card" href="dashboard.html" style="display:block">
-      <b>Дашборд</b>
-      <p style="color:var(--muted); font-size:13px; margin:6px 0 0">Метрики по заказам, выручке, загрузке. Роли ADMIN/MANAGER/OPERATOR.</p>
-    </a>
-    <a class="card" href="orders.html" style="display:block">
-      <b>Заказы — календарь</b>
-      <p style="color:var(--muted); font-size:13px; margin:6px 0 0">День/неделя/месяц/расписание, drag-and-drop перенос и resize, повторы, drawer заказа.</p>
-    </a>
-    <a class="card" href="calendar.html" style="display:block">
-      <b>Календарь</b>
-      <p style="color:var(--muted); font-size:13px; margin:6px 0 0">Неделя: запланированные и идущие заказы по исполнителям.</p>
-    </a>
-    <a class="card" href="tasks.html" style="display:block">
-      <b>Задачи</b>
-      <p style="color:var(--muted); font-size:13px; margin:6px 0 0">Список задач с фильтром «Просроченные» — переход с карточки дашборда.</p>
-    </a>
-    <a class="card" href="history.html" style="display:block">
-      <b>История</b>
-      <p style="color:var(--muted); font-size:13px; margin:6px 0 0">Единая лента HistoryEvent по всем сущностям — аудит действий.</p>
-    </a>
-  </div>
-
-  <div class="card" style="margin-top:24px">
-    <h3 style="margin-top:0">Как смотреть</h3>
-    <p style="margin-bottom:0; color:var(--muted)">
-      Откройте <code>mockups/index.html</code> в браузере и переходите по ссылкам.
-      Состояния показаны как в реальном UI: у заказа три экрана соответствуют статусам
-      <span class="badge blue">PLANNED/ASSIGNED</span> →
-      <span class="badge amber">IN_PROGRESS</span> →
-      <span class="badge purple">QUALITY_CHECK</span>.
-    </p>
+<div class="auth-page">
+  <div class="card auth-card">
+    <h1>Gavan CRM</h1>
+    <p style="color:var(--muted); margin-top:0">Вход для сотрудников</p>
+    <form>
+      <label class="field"><span>Email</span>
+        <input class="input" type="email" required>
+      </label>
+      <label class="field"><span>Пароль</span>
+        <input class="input" type="password" required minlength="6">
+      </label>
+      <div style="display:flex; gap:10px">
+        <a class="btn primary" href="dashboard.html" style="flex:1; text-align:center">Я менеджер</a>
+        <a class="btn" href="calendar.html" style="flex:1; text-align:center">Я сотрудник</a>
+      </div>
+    </form>
   </div>
 </div>
 </body>
