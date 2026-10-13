@@ -39,7 +39,7 @@
 <body>
 <div class="phone-wrap">
   <div class="phone">
-    <div class="p-top"><span>09:41</span><span>Gavan CRM</span><span>Игорь С.</span></div>
+    <div class="p-top"><span>09:41</span><span>Чистая Гавань</span><span>Игорь С.</span></div>
     <div class="p-body">
       <a href="calendar.html" style="font-size:13px">← Мой календарь</a>
 
@@ -185,7 +185,7 @@ function refresh(){
   document.getElementById('clProgress').textContent=`${passed}/${rows.length}`;
   const all=passed===rows.length;
   btn.classList.toggle('disabled',!all);
-  if(all)btn.href='order-quality.html';else btn.removeAttribute('href');
+  if(all)btn.href='calendar.html';else btn.removeAttribute('href');
 }
 rows.forEach(r=>{
   r.querySelector('.cl-head').onclick=e=>{
