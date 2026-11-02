@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Заявки — мокап</title>
+<title>Лиды — мокап</title>
 <link rel="stylesheet" href="styles.css">
 <style>
   .c-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
@@ -19,6 +19,124 @@
   .col-proc h4 { color: #92400e; }
   .col-won h4 { color: #166534; }
   .col-lost h4 { color: #991b1b; }
+
+  /* Каталог категорий */
+  .cat-overview {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;
+  }
+  @media (max-width: 720px) { .cat-overview { grid-template-columns: 1fr; } }
+  .cat-root {
+    border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px;
+    background: var(--panel); cursor: pointer; transition: border-color .15s, box-shadow .15s;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .cat-root:hover { border-color: #94a3b8; }
+  .cat-root.on-home { border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13,148,136,.12); }
+  .cat-root.on-biz { border-color: #1e56c8; box-shadow: 0 0 0 3px rgba(30,86,200,.12); }
+  .cat-ico {
+    width: 44px; height: 44px; border-radius: 10px; display: grid; place-items: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .cat-ico.home { background: #ccfbf1; color: #0f766e; }
+  .cat-ico.biz { background: #dbeafe; color: #1e40af; }
+  .cat-root h3 { margin: 0 0 4px; font-size: 15px; }
+  .cat-root p { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.35; }
+  .cat-root .n { margin-left: auto; font-size: 22px; font-weight: 700; line-height: 1; align-self: center; }
+  .cat-root.on-home .n { color: #0f766e; }
+  .cat-root.on-biz .n { color: #1e40af; }
+
+  .badge.home { background: #ccfbf1; color: #0f766e; }
+  .badge.biz { background: #dbeafe; color: #1e40af; }
+  .badge.leaf { background: #f3f4f6; color: #374151; font-weight: 500; }
+
+  .qual-script { display: flex; flex-direction: column; gap: 14px; margin-top: 12px; }
+  .qual-block { border: 1px solid var(--border); border-radius: 10px; padding: 12px; background: #fafbfc; }
+  .qual-block h4 { margin: 0 0 10px; font-size: 13px; font-weight: 700; color: var(--text); }
+  .qual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .qual-grid .full { grid-column: 1 / -1; }
+  .check-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .check-pill {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px;
+    border: 1px solid var(--border); border-radius: 999px; background: #fff;
+    font-size: 12px; color: var(--text); cursor: pointer; user-select: none;
+  }
+  .check-pill input { margin: 0; }
+  .check-pill:has(input:checked) { border-color: var(--primary); background: #eef4ff; color: #1e3a8a; }
+  .qual-mistakes {
+    margin-top: 14px; padding: 12px 14px; border-radius: 10px;
+    background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; font-size: 13px; line-height: 1.45;
+  }
+  .qual-mistakes b { display: block; margin-bottom: 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .02em; }
+  .qual-mistakes ul { margin: 0; padding-left: 18px; }
+  .qual-mistakes li { margin: 4px 0; }
+
+  .cat-path {
+    display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: 6px;
+  }
+  .cat-path .sep { color: var(--muted); font-size: 11px; }
+
+  /* Фильтр услуг */
+  .svc-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; }
+  .svc-chip {
+    border: 1px solid var(--border); background: #fff; border-radius: 999px;
+    padding: 5px 10px; font-size: 12px; cursor: pointer; color: var(--text);
+  }
+  .svc-chip:hover { border-color: #94a3b8; }
+  .svc-chip.on { background: #0f172a; color: #fff; border-color: #0f172a; }
+  .svc-chip .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .svc-chip .dot.home { background: #14b8a6; }
+  .svc-chip .dot.biz { background: #3b82f6; }
+
+  /* Пикер в модалке */
+  #modalNew .modal { max-width: 760px; max-height: 92vh; overflow: auto; }
+  .pick-section { margin-bottom: 14px; }
+  .pick-section > .lbl {
+    font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase;
+    letter-spacing: .04em; margin-bottom: 8px;
+  }
+  .pick-roots { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pick-root {
+    border: 2px solid var(--border); border-radius: 12px; padding: 14px;
+    cursor: pointer; background: #fff; text-align: left;
+  }
+  .pick-root:hover { border-color: #94a3b8; }
+  .pick-root.on.home { border-color: #0d9488; background: #f0fdfa; }
+  .pick-root.on.biz { border-color: #1e56c8; background: #eff6ff; }
+  .pick-root b { display: block; font-size: 15px; margin-bottom: 2px; }
+  .pick-root span { font-size: 12px; color: var(--muted); }
+
+  .pick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  @media (max-width: 560px) {
+    .pick-roots, .pick-grid { grid-template-columns: 1fr; }
+  }
+  .pick-card {
+    border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px;
+    cursor: pointer; background: #fff; font-size: 13px; line-height: 1.3;
+    display: flex; align-items: flex-start; gap: 8px;
+  }
+  .pick-card:hover { border-color: #94a3b8; background: #fafafa; }
+  .pick-card.on { border-color: var(--primary); background: #eff6ff; box-shadow: inset 0 0 0 1px var(--primary); }
+  .pick-card .mark {
+    width: 16px; height: 16px; border-radius: 50%; border: 2px solid #cbd5e1;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .pick-card.on .mark { border-color: var(--primary); background: var(--primary);
+    box-shadow: inset 0 0 0 3px #fff; }
+
+  .pick-options { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pick-opt {
+    border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px;
+    font-size: 13px; cursor: pointer; background: #fff;
+  }
+  .pick-opt:hover { border-color: #94a3b8; }
+  .pick-opt.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+  .pick-summary {
+    border-radius: 10px; padding: 10px 12px; font-size: 13px;
+    background: #f8fafc; border: 1px dashed var(--border); margin-bottom: 12px;
+  }
+  .pick-summary.empty { color: var(--muted); }
+  .pick-summary b { font-weight: 600; }
 </style>
 </head>
 <body>
@@ -32,9 +150,10 @@
       <a href="dashboard.html">Дашборд</a>
       <a href="clients.html">Клиенты</a>
       <a href="objects.html">Объекты</a>
-      <a href="leads.html" class="active">Заявки</a>
+      <a href="leads.html" class="active">Лиды</a>
       <a href="deals.html">Сделки</a>
       <a href="orders.html">Заказы</a>
+      <a href="employees.html">Сотрудники</a>
       <a href="tasks.html">Задачи</a>
       <a href="history.html">История</a>
     </nav>
@@ -50,7 +169,7 @@
             <div class="dd-title">Уведомления</div>
             <a href="order-quality.html">ORD-SEED-003 сдан на проверку</a>
             <a href="deals.html">Сделка «Вектра» выиграна · 96 000 ₽</a>
-            <a href="leads.html">Новая заявка с сайта</a>
+            <a href="leads.html">Новый лид с сайта</a>
           </div>
         </details>
         <details class="dd">
@@ -71,14 +190,35 @@
 
       <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap">
         <div>
-          <h2 style="margin-bottom:2px">Заявки</h2>
-          <p style="color:var(--muted); margin:0 0 16px; font-size:14px">Входящие обращения клиентов — перетаскивайте карточки между колонками</p>
+          <h2 style="margin-bottom:2px">Лиды</h2>
+          <p style="color:var(--muted); margin:0 0 16px; font-size:14px">Приём лида (диспетчер) → Квалификация (менеджер продаж) → создать сделку</p>
         </div>
-        <span class="btn primary" id="btnNew">+ Новая заявка</span>
+        <span class="btn primary" id="btnNew">+ Новый лид</span>
       </div>
 
+      <div class="cat-overview">
+        <div class="cat-root" id="rootHome" data-root="home">
+          <div class="cat-ico home">⌂</div>
+          <div style="flex:1; min-width:0">
+            <h3>Для дома</h3>
+            <p>Химчистка, генеральная, окна, после ремонта, территории</p>
+          </div>
+          <div class="n" id="cntHome">0</div>
+        </div>
+        <div class="cat-root" id="rootBiz" data-root="biz">
+          <div class="cat-ico biz">▦</div>
+          <div style="flex:1; min-width:0">
+            <h3>Для бизнеса и гос. организаций</h3>
+            <p>Офисы по графику, послестрой, окна, премиум, территории</p>
+          </div>
+          <div class="n" id="cntBiz">0</div>
+        </div>
+      </div>
+
+      <div class="svc-chips" id="svcChips"></div>
+
       <div class="toolbar">
-        <input class="input" id="q" style="max-width:340px" placeholder="Поиск по клиенту, заявке, телефону или объекту">
+        <input class="input" id="q" style="max-width:340px" placeholder="Поиск по клиенту, лиду, телефону или объекту">
         <select class="input" id="fSource" style="max-width:160px">
           <option value="">Источник: все</option>
           <option>Сайт</option><option>Телефон</option><option>WhatsApp</option><option>Telegram</option>
@@ -95,7 +235,7 @@
 
       <div class="kanban" id="board"></div>
       <div id="empty" class="card empty" style="display:none">
-        <b>Заявки не найдены</b>
+        <b>Лиды не найдены</b>
         <p style="color:var(--muted)">Попробуйте изменить параметры поиска или фильтров.</p>
         <span class="btn" id="btnReset2">Сбросить фильтры</span>
       </div>
@@ -109,21 +249,24 @@
 
 <div class="modal-backdrop" id="modalLost" style="display:none">
   <div class="modal">
-    <h3>Причина потери</h3>
+    <h3>Не квалифицирован</h3>
+    <p style="color:var(--muted);font-size:13px;margin:0 0 12px">Вежливый отказ или передача партнёру</p>
     <label class="field"><span>Причина *</span>
       <select class="input" id="lostReason">
         <option value="">— выберите —</option>
+        <option value="POLITE">Вежливый отказ</option>
+        <option value="PARTNER">Передача партнёру</option>
         <option value="PRICE">Цена</option>
         <option value="COMPETITOR">Клиент выбрал другую компанию</option>
         <option value="REFUSED">Клиент отказался</option>
         <option value="NO_CONTACT">Не удалось связаться</option>
-        <option value="OBJECT">Объект не подходит</option>
+        <option value="OBJECT">Объект не подходит / вне зоны</option>
         <option value="TIMING">Сроки</option>
         <option value="OTHER">Другое</option>
       </select>
-      <div class="err" id="eReason">Укажите причину потери</div>
+      <div class="err" id="eReason">Укажите причину</div>
     </label>
-    <label class="field"><span>Комментарий</span><textarea class="input" id="lostComment" rows="2"></textarea></label>
+    <label class="field"><span>Комментарий</span><textarea class="input" id="lostComment" rows="2" placeholder="Что сказали клиенту / кому передали"></textarea></label>
     <div class="actions">
       <span class="btn" onclick="closeLost()">Отмена</span>
       <span class="btn danger" id="btnLostSave">Сохранить</span>
@@ -133,21 +276,53 @@
 
 <div class="modal-backdrop" id="modalNew" style="display:none">
   <div class="modal">
-    <h3>Новая заявка</h3>
+    <h3>Новый лид</h3>
+
+    <div class="pick-summary empty" id="nCatSummary">Категория не выбрана</div>
+    <div class="err" id="eCat">Выберите категорию услуги до конца</div>
+
+    <div class="pick-section">
+      <div class="lbl">1. Сегмент</div>
+      <div class="pick-roots">
+        <button type="button" class="pick-root" data-root="home" id="pickHome">
+          <b>⌂ Для дома</b>
+          <span>Частные клиенты, квартиры и дома</span>
+        </button>
+        <button type="button" class="pick-root" data-root="biz" id="pickBiz">
+          <b>▦ Для бизнеса и гос. организаций</b>
+          <span>Офисы, HoReCa, медучреждения, объекты</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="pick-section" id="secService" style="display:none">
+      <div class="lbl">2. Услуга</div>
+      <div class="pick-grid" id="pickServices"></div>
+    </div>
+
+    <div class="pick-section" id="secChild" style="display:none">
+      <div class="lbl" id="lblChild">3. Тип объекта</div>
+      <div class="pick-grid" id="pickChildren"></div>
+    </div>
+
+    <div class="pick-section" id="secOpt" style="display:none">
+      <div class="lbl" id="lblOpt">4. Параметр</div>
+      <div class="pick-options" id="pickOptions"></div>
+    </div>
+
     <label class="field"><span>Источник *</span>
       <select class="input" id="nSource"><option value="">— выберите —</option>
         <option>Сайт</option><option>Телефон</option><option>WhatsApp</option><option>Telegram</option>
         <option>Avito</option><option>Яндекс Бизнес</option><option>Рекомендация</option><option>Тендер</option><option>Другое</option>
       </select>
-      <div class="err" id="eSource">Укажите источник заявки</div>
+      <div class="err" id="eSource">Укажите источник лида</div>
     </label>
     <label class="field"><span>Клиент *</span>
       <select class="input" id="nClient"><option value="">— выберите —</option></select>
       <div class="err" id="eClient">Выберите клиента</div>
     </label>
-    <label class="field"><span>Информация *</span>
-      <textarea class="input" id="nInfo" rows="3" placeholder="Что нужно клиенту?"></textarea>
-      <div class="err" id="eInfo">Добавьте информацию о запросе</div>
+    <label class="field"><span>Информация</span>
+      <textarea class="input" id="nInfo" rows="2" placeholder="Дополнительные детали (необязательно)"></textarea>
     </label>
     <label class="field"><span>Менеджер</span>
       <select class="input" id="nManager"><option value="">— не назначен —</option><option>Алексей Смирнов</option><option>Мария Ким</option></select>
@@ -159,7 +334,7 @@
     <div id="nObjects" style="border:1px solid var(--border); border-radius:8px; padding:8px 10px; max-height:130px; overflow:auto; font-size:13px"></div>
     <div class="actions">
       <span class="btn" onclick="closeNew()">Отмена</span>
-      <span class="btn primary" id="btnCreate">Создать заявку</span>
+      <span class="btn primary" id="btnCreate">Создать лид</span>
     </div>
   </div>
 </div>
@@ -167,16 +342,119 @@
 <div class="toast-wrap" id="toasts"></div>
 
 <script>
-const STATUSES = { RECEIVED:['Получено','blue'], IN_PROGRESS:['В обработке','amber'], WON:['Выиграна','green'], LOST:['Потеряна','red'] };
+const STATUSES = { RECEIVED:['Приём лида','blue'], QUALIFICATION:['Квалификация','amber'], QUALIFIED:['Квалифицирован','green'], LOST:['Не квалифицирован','red'] };
 const COLS = [
-  ['RECEIVED','Получено','col-new'],
-  ['IN_PROGRESS','В обработке','col-proc'],
-  ['WON','Выиграна','col-won'],
-  ['LOST','Потеряна','col-lost'],
+  ['RECEIVED','Приём лида','col-new'],
+  ['QUALIFICATION','Квалификация','col-proc'],
+  ['QUALIFIED','Квалифицирован','col-won'],
+  ['LOST','Не квалифицирован','col-lost'],
 ];
-const REASONS = { PRICE:'Цена', COMPETITOR:'Клиент выбрал другую компанию', REFUSED:'Клиент отказался', NO_CONTACT:'Не удалось связаться', OBJECT:'Объект не подходит', TIMING:'Сроки', OTHER:'Другое' };
+const RACI = {
+  RECEIVED:'Цель: назначить ответственного, подтвердить источник, отсеять мусор',
+  QUALIFICATION:'Цель: понять, подходит ли клиент, и собрать данные для точной сметы.',
+  QUALIFIED:'Готов к сделке → Расчёт / КП',
+  LOST:'Вежливый отказ или передача партнёру',
+};
+const REASONS = { POLITE:'Вежливый отказ', PARTNER:'Передача партнёру', PRICE:'Цена', COMPETITOR:'Клиент выбрал другую компанию', REFUSED:'Клиент отказался', NO_CONTACT:'Не удалось связаться', OBJECT:'Объект не подходит / вне зоны', TIMING:'Сроки', OTHER:'Другое' };
 const MANAGERS = ['Алексей Смирнов','Мария Ким'];
 const EMPLOYEES = ['Иван Петров','Олег Иванов','Сергей Петров'];
+const CLEAN_TYPES = ['поддерживающая','генеральная','после ремонта','специализированная'];
+const OBJ_TYPES = ['квартира','дом','офис'];
+const DIRT_LEVELS = ['слабое','среднее','сильное'];
+const EXTRA_OPTS = ['окна','химчистка','духовка','холодильник','балкон'];
+const LEAD_SOURCES = ['Сайт','Телефон','WhatsApp','Telegram','Avito','Яндекс Бизнес','Рекомендация','Тендер','Другое'];
+const pill = (name, value, checked, label=value) =>
+  `<label class="check-pill"><input type="checkbox" name="${name}" value="${esc(value)}" ${checked?'checked':''}> ${esc(label)}</label>`;
+const radioPill = (name, value, checked, label=value) =>
+  `<label class="check-pill"><input type="radio" name="${name}" value="${esc(value)}" ${checked?'checked':''}> ${esc(label)}</label>`;
+
+const SIZES_50 = ['до 50 м²','50–100 м²','от 100 м²'];
+const SIZES_100 = ['до 100 м²','100–200 м²','от 200 м²'];
+const WINDOW_OPTS = ['С одной стороны','С двух сторон','Промышленный альпинизм'];
+
+const CATALOG = {
+  home: {
+    id: 'home',
+    label: 'Для дома',
+    short: 'Дом',
+    tone: 'home',
+    services: [
+      { id: 'home-chem', label: 'Химчистка мебели и ковров' },
+      { id: 'home-general', label: 'Генеральная уборка', childLabel: 'Тип объекта', children: [
+        { id: 'apt', label: 'Квартиры', optLabel: 'Площадь', options: SIZES_50 },
+        { id: 'cottage', label: 'Коттеджи', optLabel: 'Площадь', options: SIZES_100 },
+        { id: 'house', label: 'Дома / апартаменты', optLabel: 'Площадь', options: SIZES_50 },
+      ]},
+      { id: 'home-windows', label: 'Мойка окон (витрин, фасадов)', childLabel: 'Способ', options: WINDOW_OPTS },
+      { id: 'home-after', label: 'Уборка после ремонта' },
+      { id: 'home-grounds', label: 'Уборка прилегающих территорий' },
+    ],
+  },
+  biz: {
+    id: 'biz',
+    label: 'Для бизнеса и гос. организаций',
+    short: 'Бизнес',
+    tone: 'biz',
+    services: [
+      { id: 'biz-office', label: 'Уборка офисов и предприятий (по графику)' },
+      { id: 'biz-post', label: 'Послестроительная уборка' },
+      { id: 'biz-windows', label: 'Мойка окон (витрин, фасадов)', childLabel: 'Способ', options: WINDOW_OPTS },
+      { id: 'biz-premium', label: 'Премиум клининг', childLabel: 'Сегмент объекта', children: [
+        { id: 'prem-office', label: 'Офисы и бизнес-центры' },
+        { id: 'prem-horeca', label: 'Рестораны и HoReCa' },
+        { id: 'prem-med', label: 'Медицинские учреждения' },
+        { id: 'prem-beauty', label: 'Салоны красоты и фитнес' },
+        { id: 'prem-res', label: 'Частные резиденции и коттеджи' },
+      ]},
+      { id: 'biz-grounds', label: 'Уборка прилегающих территорий' },
+    ],
+  },
+};
+
+function findService(rootId, serviceId) {
+  return CATALOG[rootId]?.services.find(s => s.id === serviceId);
+}
+function findChild(svc, childId) {
+  return svc?.children?.find(c => c.id === childId);
+}
+function catComplete(cat) {
+  if (!cat?.root || !cat?.service) return false;
+  const svc = findService(cat.root, cat.service);
+  if (!svc) return false;
+  if (svc.children) {
+    if (!cat.child) return false;
+    const ch = findChild(svc, cat.child);
+    if (ch?.options && !cat.option) return false;
+    return true;
+  }
+  if (svc.options && !cat.option) return false;
+  return true;
+}
+function catPath(cat) {
+  if (!cat?.root) return [];
+  const root = CATALOG[cat.root];
+  const parts = [{ text: root.label, tone: root.tone }];
+  const svc = findService(cat.root, cat.service);
+  if (!svc) return parts;
+  parts.push({ text: svc.label, tone: 'leaf' });
+  if (cat.child) {
+    const ch = findChild(svc, cat.child);
+    if (ch) parts.push({ text: ch.label, tone: 'leaf' });
+  }
+  if (cat.option) parts.push({ text: cat.option, tone: 'leaf' });
+  return parts;
+}
+function catTitle(cat) {
+  return catPath(cat).map(p => p.text).slice(1).join(' · ') || CATALOG[cat.root]?.label || 'Лид';
+}
+function catPathHtml(cat) {
+  const parts = catPath(cat);
+  if (!parts.length) return '<span class="c-sub">Категория не указана</span>';
+  return `<div class="cat-path">${parts.map((p,i)=>`
+    ${i?`<span class="sep">›</span>`:''}
+    <span class="badge ${p.tone}">${esc(p.text)}</span>
+  `).join('')}</div>`;
+}
 
 const CLIENTS = [
  {id:'cl1',name:'Анна Петрова',phone:'+7 777 901-45-78'},
@@ -213,99 +491,152 @@ const OBJECTS = [
  {id:'o16',name:'Квартира',type:'Квартира',addr:'Алматы, пр. Райымбека, 300, кв. 21',area:'55 м²',status:'Активен'},
  {id:'o17',name:'Склад',type:'Склад',addr:'Алматы, пос. Калкаман, 2',area:'1 400 м²',status:'Активен'},
 ];
-const clientById = id => CLIENTS.find(c=>c.id===id);
-const objById = id => OBJECTS.find(o=>o.id===id);
-const now = () => { const d=new Date(); return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
-const H = (at,action,details='') => ({at,action,details});
+const clientById=id=>CLIENTS.find(c=>c.id===id);
+const objById=id=>OBJECTS.find(o=>o.id===id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const badge=(t,cls)=>`<span class="badge ${cls||'gray'}">${esc(t)}</span>`;
+const now=()=>{const d=new Date();return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;};
+const H=(at,action,details='')=>({at,action,details});
 
 const applications = [
- {id:'#1049',title:'Генеральная уборка квартиры',source:'Сайт',clientId:'cl1',information:'Генеральная уборка квартиры после ремонта.',managerId:null,employeeId:null,objectIds:['o1'],status:'RECEIVED',createdAt:'06.10 13:02',history:[H('06.10 13:02','Заявка получена','Источник: сайт')]},
- {id:'#1050',title:'Регулярная уборка офиса',source:'Телефон',clientId:'cl2',information:'Требуется регулярная уборка офисного помещения.',managerId:null,employeeId:null,objectIds:['o2'],status:'RECEIVED',createdAt:'06.10 11:20',history:[H('06.10 11:20','Заявка получена','Источник: телефон')]},
- {id:'#1051',title:'Мойка окон',source:'WhatsApp',clientId:'cl3',information:'Требуется мойка окон в частном доме.',managerId:null,employeeId:null,objectIds:['o3'],status:'RECEIVED',createdAt:'06.10 09:48',history:[H('06.10 09:48','Заявка получена','Источник: WhatsApp')]},
- {id:'#1052',title:'Обслуживание склада',source:'Рекомендация',clientId:'cl4',information:'Клиент интересуется регулярным обслуживанием склада.',managerId:null,employeeId:null,objectIds:['o4'],status:'RECEIVED',createdAt:'05.10 17:31',history:[H('05.10 17:31','Заявка получена','Источник: рекомендация')]},
- {id:'#1048',title:'Уборка офисного комплекса',source:'Сайт',clientId:'cl5',information:'Регулярная уборка офисного комплекса 3 раза в неделю. Клиент также рассматривает обслуживание склада.',managerId:'Алексей Смирнов',employeeId:'Иван Петров',objectIds:['o5','o6'],status:'IN_PROGRESS',createdAt:'02.10 10:42',history:[
-   H('02.10 10:42','Заявка получена','Источник: сайт'),H('02.10 10:50','Назначен менеджер','Алексей Смирнов'),H('02.10 11:20','Добавлен объект','Бизнес-центр «Вектор»'),H('02.10 12:10','Назначен сотрудник','Иван Петров'),H('02.10 14:30','Статус изменён','Получено → В обработке')]},
- {id:'#1047',title:'Комплексное обслуживание',source:'Тендер',clientId:'cl6',information:'Комплексное обслуживание производственного помещения и склада.',managerId:'Мария Ким',employeeId:'Олег Иванов',objectIds:['o7','o8'],status:'IN_PROGRESS',createdAt:'02.10 09:15',history:[
-   H('02.10 09:15','Заявка получена','Источник: тендер'),H('02.10 10:00','Назначен менеджер','Мария Ким'),H('02.10 15:40','Статус изменён','Получено → В обработке')]},
- {id:'#1046',title:'Ежедневная уборка БЦ',source:'Телефон',clientId:'cl7',information:'Требуется ежедневная уборка бизнес-центра.',managerId:'Алексей Смирнов',employeeId:'Сергей Петров',objectIds:['o9'],status:'IN_PROGRESS',createdAt:'01.10 16:05',history:[
-   H('01.10 16:05','Заявка получена','Источник: телефон'),H('01.10 16:40','Назначен менеджер','Алексей Смирнов'),H('02.10 09:10','Статус изменён','Получено → В обработке')]},
- {id:'#1045',title:'Уборка дома перед заселением',source:'Avito',clientId:'cl8',information:'Генеральная уборка дома перед заселением.',managerId:'Мария Ким',employeeId:null,objectIds:['o10'],status:'IN_PROGRESS',createdAt:'01.10 12:20',history:[
-   H('01.10 12:20','Заявка получена','Источник: Avito'),H('01.10 14:00','Назначен менеджер','Мария Ким'),H('02.10 10:30','Статус изменён','Получено → В обработке')]},
- {id:'#1044',title:'Обслуживание офиса',source:'Сайт',clientId:'cl9',information:'Регулярное обслуживание офисного помещения.',managerId:'Алексей Смирнов',employeeId:'Иван Петров',objectIds:['o11'],status:'WON',createdAt:'29.09 15:12',history:[
-   H('29.09 15:12','Заявка получена','Источник: сайт'),H('29.09 16:00','Назначен менеджер','Алексей Смирнов'),H('30.09 11:25','Статус изменён','В обработке → Выиграна')]},
- {id:'#1043',title:'Генеральная уборка квартиры',source:'Рекомендация',clientId:'cl1',information:'Генеральная уборка квартиры.',managerId:'Мария Ким',employeeId:'Олег Иванов',objectIds:['o12'],status:'WON',createdAt:'29.09 10:40',history:[
-   H('29.09 10:40','Заявка получена','Источник: рекомендация'),H('29.09 14:15','Статус изменён','В обработке → Выиграна')]},
- {id:'#1042',title:'Уборка производства',source:'Телефон',clientId:'cl10',information:'Регулярная уборка производственного помещения.',managerId:'Алексей Смирнов',employeeId:'Сергей Петров',objectIds:['o13'],status:'WON',createdAt:'28.09 13:55',history:[
-   H('28.09 13:55','Заявка получена','Источник: телефон'),H('29.09 09:30','Статус изменён','В обработке → Выиграна')]},
- {id:'#1041',title:'Уборка дома и мойка окон',source:'WhatsApp',clientId:'cl11',information:'Уборка частного дома и мойка окон.',managerId:'Мария Ким',employeeId:'Олег Иванов',objectIds:['o14'],status:'WON',createdAt:'27.09 17:48',history:[
-   H('27.09 17:48','Заявка получена','Источник: WhatsApp'),H('28.09 12:05','Статус изменён','В обработке → Выиграна')]},
- {id:'#1040',title:'Обслуживание производства',source:'Тендер',clientId:'cl12',information:'Комплексное обслуживание производственного объекта.',managerId:'Алексей Смирнов',employeeId:null,objectIds:['o15'],status:'LOST',lostReason:'PRICE',lostComment:'Клиенту дорого',createdAt:'26.09 14:10',history:[
-   H('26.09 14:10','Заявка получена','Источник: тендер'),H('27.09 11:00','Статус изменён','В обработке → Потеряна'),H('27.09 11:00','Причина потери','Цена')]},
- {id:'#1039',title:'Генеральная уборка квартиры',source:'Сайт',clientId:'cl13',information:'Генеральная уборка квартиры.',managerId:'Мария Ким',employeeId:null,objectIds:['o16'],status:'LOST',lostReason:'COMPETITOR',lostComment:'',createdAt:'25.09 12:30',history:[
-   H('25.09 12:30','Заявка получена','Источник: сайт'),H('26.09 10:15','Статус изменён','В обработке → Потеряна'),H('26.09 10:15','Причина потери','Клиент выбрал другую компанию')]},
- {id:'#1038',title:'Уборка склада',source:'Телефон',clientId:'cl14',information:'Регулярная уборка складского помещения.',managerId:'Алексей Смирнов',employeeId:null,objectIds:['o17'],status:'LOST',lostReason:'NO_CONTACT',lostComment:'Три звонка без ответа',createdAt:'24.09 09:20',history:[
-   H('24.09 09:20','Заявка получена','Источник: телефон'),H('25.09 16:45','Статус изменён','В обработке → Потеряна'),H('25.09 16:45','Причина потери','Не удалось связаться')]},
+ {id:'#1049',title:'Генеральная уборка · Квартиры · 50–100 м²',source:'Сайт',clientId:'cl1',information:'Генеральная уборка квартиры после ремонта.',managerId:null,employeeId:null,objectIds:['o1'],status:'RECEIVED',createdAt:'06.10 13:02',
+  cat:{root:'home',service:'home-general',child:'apt',option:'50–100 м²'},
+  history:[H('06.10 13:02','Лид получен','Источник: сайт')]},
+ {id:'#1050',title:'Уборка офисов и предприятий (по графику)',source:'Телефон',clientId:'cl2',information:'Требуется регулярная уборка офисного помещения.',managerId:null,employeeId:null,objectIds:['o2'],status:'RECEIVED',createdAt:'06.10 11:20',
+  cat:{root:'biz',service:'biz-office'},
+  history:[H('06.10 11:20','Лид получен','Источник: телефон')]},
+ {id:'#1051',title:'Мойка окон · С двух сторон',source:'WhatsApp',clientId:'cl3',information:'Требуется мойка окон в частном доме.',managerId:null,employeeId:null,objectIds:['o3'],status:'RECEIVED',createdAt:'06.10 09:48',
+  cat:{root:'home',service:'home-windows',option:'С двух сторон'},
+  history:[H('06.10 09:48','Лид получен','Источник: WhatsApp')]},
+ {id:'#1052',title:'Премиум клининг · Офисы и бизнес-центры',source:'Рекомендация',clientId:'cl4',information:'Клиент интересуется премиум-обслуживанием склада и офиса.',managerId:null,employeeId:null,objectIds:['o4'],status:'RECEIVED',createdAt:'05.10 17:31',
+  cat:{root:'biz',service:'biz-premium',child:'prem-office'},
+  history:[H('05.10 17:31','Лид получен','Источник: рекомендация')]},
+ {id:'#1048',title:'Уборка офисов и предприятий (по графику)',source:'Сайт',clientId:'cl5',information:'Регулярная уборка офисного комплекса 3 раза в неделю.',managerId:'Алексей Смирнов',employeeId:'Иван Петров',objectIds:['o5','o6'],status:'QUALIFICATION',createdAt:'02.10 10:42',
+  cat:{root:'biz',service:'biz-office'},
+  qualify:{cleanType:'поддерживающая',objType:'офис',area:'1200',rooms:'',baths:'8',dirt:'среднее',pets:false,kids:false,specialZones:'переговорные, кухня',extras:['окна'],address:'пр. Абая, 88',zone:'ok',wishDate:'ежедневно',wishTime:'вечером',budget:'200–250 тыс'},
+  history:[H('02.10 10:42','Лид получен','Источник: сайт'),H('02.10 10:50','Назначен менеджер','Алексей Смирнов'),H('02.10 11:20','Добавлен объект','Бизнес-центр «Вектор»'),H('02.10 12:10','Назначен сотрудник','Иван Петров'),H('02.10 14:30','Статус изменён','Приём лида → Квалификация')]},
+ {id:'#1047',title:'Послестроительная уборка',source:'Тендер',clientId:'cl6',information:'Комплексное обслуживание производственного помещения и склада.',managerId:'Мария Ким',employeeId:'Олег Иванов',objectIds:['o7','o8'],status:'QUALIFICATION',createdAt:'02.10 09:15',
+  cat:{root:'biz',service:'biz-post'},
+  qualify:{cleanType:'после ремонта',objType:'офис',area:'3400',rooms:'',baths:'4',dirt:'сильное',pets:false,kids:false,specialZones:'после стройки, пыль',extras:[],address:'Индустриальная зона, 3',zone:'ok',wishDate:'с 15.10',wishTime:'день',budget:'по смете'},
+  history:[H('02.10 09:15','Лид получен','Источник: тендер'),H('02.10 10:00','Назначен менеджер','Мария Ким'),H('02.10 15:40','Статус изменён','Приём лида → Квалификация')]},
+ {id:'#1046',title:'Премиум клининг · Офисы и бизнес-центры',source:'Телефон',clientId:'cl7',information:'Требуется ежедневная уборка бизнес-центра.',managerId:'Алексей Смирнов',employeeId:'Сергей Петров',objectIds:['o9'],status:'QUALIFICATION',createdAt:'01.10 16:05',
+  cat:{root:'biz',service:'biz-premium',child:'prem-office'},
+  qualify:{cleanType:'поддерживающая',objType:'офис',area:'2600',rooms:'',baths:'12',dirt:'слабое',pets:false,kids:false,specialZones:'лобби, лифты',extras:['окна'],address:'ул. Тимирязева, 42',zone:'ok',wishDate:'ежедневно',wishTime:'ночь',budget:'~400 тыс'},
+  history:[H('01.10 16:05','Лид получен','Источник: телефон'),H('01.10 16:40','Назначен менеджер','Алексей Смирнов'),H('02.10 09:10','Статус изменён','Приём лида → Квалификация')]},
+ {id:'#1045',title:'Генеральная уборка · Коттеджи · от 200 м²',source:'Avito',clientId:'cl8',information:'Генеральная уборка дома перед заселением.',managerId:'Мария Ким',employeeId:null,objectIds:['o10'],status:'QUALIFICATION',createdAt:'01.10 12:20',
+  cat:{root:'home',service:'home-general',child:'cottage',option:'от 200 м²'},
+  qualify:{cleanType:'генеральная',objType:'дом',area:'210',rooms:'5',baths:'3',dirt:'среднее',pets:false,kids:true,specialZones:'терраса',extras:['окна','балкон'],address:'мкр. Коктобе, 7',zone:'ok',wishDate:'до 10.10',wishTime:'утро',budget:'30–40 тыс'},
+  history:[H('01.10 12:20','Лид получен','Источник: Avito'),H('01.10 14:00','Назначен менеджер','Мария Ким'),H('02.10 10:30','Статус изменён','Приём лида → Квалификация')]},
+ {id:'#1044',title:'Уборка офисов и предприятий (по графику)',source:'Сайт',clientId:'cl9',information:'Регулярное обслуживание офисного помещения.',managerId:'Алексей Смирнов',employeeId:'Иван Петров',objectIds:['o11'],status:'QUALIFIED',createdAt:'29.09 15:12',
+  cat:{root:'biz',service:'biz-office'},
+  qualify:{cleanType:'поддерживающая',objType:'офис',area:'380',rooms:'',baths:'2',dirt:'слабое',pets:false,kids:false,specialZones:'',extras:[],address:'Наурызбай батыра, 63',zone:'ok',wishDate:'Вт/Чт',wishTime:'вечер',budget:'~120 тыс'},
+  history:[H('29.09 15:12','Лид получен','Источник: сайт'),H('29.09 16:00','Назначен менеджер','Алексей Смирнов'),H('30.09 11:25','Статус изменён','Квалификация → Квалифицирован')]},
+ {id:'#1043',title:'Генеральная уборка · Квартиры · 50–100 м²',source:'Рекомендация',clientId:'cl1',information:'Генеральная уборка квартиры.',managerId:'Мария Ким',employeeId:'Олег Иванов',objectIds:['o12'],status:'QUALIFIED',createdAt:'29.09 10:40',
+  cat:{root:'home',service:'home-general',child:'apt',option:'50–100 м²'},
+  qualify:{cleanType:'генеральная',objType:'квартира',area:'64',rooms:'2',baths:'1',dirt:'среднее',pets:false,kids:false,specialZones:'',extras:['духовка'],address:'Жандосова, 12',zone:'ok',wishDate:'выходные',wishTime:'день',budget:'15–20 тыс'},
+  history:[H('29.09 10:40','Лид получен','Источник: рекомендация'),H('29.09 14:15','Статус изменён','Квалификация → Квалифицирован')]},
+ {id:'#1042',title:'Послестроительная уборка',source:'Телефон',clientId:'cl10',information:'Регулярная уборка производственного помещения.',managerId:'Алексей Смирнов',employeeId:'Сергей Петров',objectIds:['o13'],status:'QUALIFIED',createdAt:'28.09 13:55',
+  cat:{root:'biz',service:'biz-post'},
+  qualify:{cleanType:'специализированная',objType:'офис',area:'5000',rooms:'',baths:'6',dirt:'сильное',pets:false,kids:false,specialZones:'цех, склад',extras:[],address:'Суюнбая, 220',zone:'ok',wishDate:'с 01.11',wishTime:'день',budget:'по КП'},
+  history:[H('28.09 13:55','Лид получен','Источник: телефон'),H('29.09 09:30','Статус изменён','Квалификация → Квалифицирован')]},
+ {id:'#1041',title:'Химчистка мебели и ковров',source:'WhatsApp',clientId:'cl11',information:'Уборка частного дома и мойка окон.',managerId:'Мария Ким',employeeId:'Олег Иванов',objectIds:['o14'],status:'QUALIFIED',createdAt:'27.09 17:48',
+  cat:{root:'home',service:'home-chem'},
+  qualify:{cleanType:'специализированная',objType:'дом',area:'160',rooms:'4',baths:'2',dirt:'среднее',pets:true,kids:true,specialZones:'ковры',extras:['химчистка','окна'],address:'мкр. Мирас, 33',zone:'ok',wishDate:'будни',wishTime:'день',budget:'~25 тыс'},
+  history:[H('27.09 17:48','Лид получен','Источник: WhatsApp'),H('28.09 12:05','Статус изменён','Квалификация → Квалифицирован')]},
+ {id:'#1040',title:'Мойка окон · Промышленный альпинизм',source:'Тендер',clientId:'cl12',information:'Мойка фасадов производственного объекта.',managerId:'Алексей Смирнов',employeeId:null,objectIds:['o15'],status:'LOST',lostReason:'PARTNER',lostComment:'Передан партнёру по альпинизму',createdAt:'26.09 14:10',
+  cat:{root:'biz',service:'biz-windows',option:'Промышленный альпинизм'},
+  history:[H('26.09 14:10','Лид получен','Источник: тендер'),H('27.09 11:00','Статус изменён','Квалификация → Не квалифицирован'),H('27.09 11:00','Причина','Передача партнёру')]},
+ {id:'#1039',title:'Уборка после ремонта',source:'Сайт',clientId:'cl13',information:'Генеральная уборка квартиры после ремонта.',managerId:'Мария Ким',employeeId:null,objectIds:['o16'],status:'LOST',lostReason:'POLITE',lostComment:'Вежливо отказали — вне зоны',createdAt:'25.09 12:30',
+  cat:{root:'home',service:'home-after'},
+  history:[H('25.09 12:30','Лид получен','Источник: сайт'),H('26.09 10:15','Статус изменён','Квалификация → Не квалифицирован'),H('26.09 10:15','Причина','Вежливый отказ')]},
+ {id:'#1038',title:'Уборка прилегающих территорий',source:'Телефон',clientId:'cl14',information:'Уборка территории склада.',managerId:'Алексей Смирнов',employeeId:null,objectIds:['o17'],status:'LOST',lostReason:'NO_CONTACT',lostComment:'Три звонка без ответа',createdAt:'24.09 09:20',
+  cat:{root:'biz',service:'biz-grounds'},
+  history:[H('24.09 09:20','Лид получен','Источник: телефон'),H('25.09 16:45','Статус изменён','Квалификация → Не квалифицирован'),H('25.09 16:45','Причина','Не удалось связаться')]},
 ];
 
 const clientHistory = {};
 CLIENTS.forEach(c=>clientHistory[c.id]=[]);
 applications.forEach(a=>{
-  clientHistory[a.clientId].push({at:a.createdAt, action:`Заявка ${a.id} получена · ${a.source}`});
-  if (a.status!=='RECEIVED') clientHistory[a.clientId].push({at:a.history.at(-2)?.at||a.createdAt, action:`Заявка ${a.id} переведена в «${STATUSES[a.status][0]}»`});
-  if (a.status==='LOST') clientHistory[a.clientId].push({at:a.history.at(-1).at, action:`Заявка ${a.id} потеряна. Причина: ${REASONS[a.lostReason]}`});
+  clientHistory[a.clientId].push({at:a.createdAt, action:`Лид ${a.id} получен · ${a.source}`});
+  if (a.status!=='RECEIVED') clientHistory[a.clientId].push({at:a.history.at(-2)?.at||a.createdAt, action:`Лид ${a.id} переведён в «${STATUSES[a.status][0]}»`});
+  if (a.status==='LOST') clientHistory[a.clientId].push({at:a.history.at(-1).at, action:`Лид ${a.id} не квалифицирован. Причина: ${REASONS[a.lostReason]}`});
 });
 const pushHist = (a,action,details='') => {
   a.history.push(H(now(),action,details));
   let txt;
-  if (action==='Статус изменён') txt = `Заявка ${a.id} переведена в «${details.split('→ ')[1]}»`;
-  else if (action==='Назначен менеджер') txt = `По заявке ${a.id} назначен менеджер ${details}`;
-  else if (action==='Снят менеджер') txt = `По заявке ${a.id} снят менеджер`;
-  else if (action==='Назначен сотрудник') txt = `По заявке ${a.id} назначен сотрудник ${details}`;
-  else if (action==='Снят сотрудник') txt = `По заявке ${a.id} снят сотрудник`;
-  else if (action==='Добавлен объект') txt = `К заявке ${a.id} добавлен объект «${details}»`;
-  else if (action==='Причина потери') txt = `Заявка ${a.id} потеряна. Причина: ${details}`;
-  else if (action==='Заметка') txt = `По заявке ${a.id}: ${details}`;
-  if (txt) {
-    clientHistory[a.clientId].push({at:now(), action:txt});
-    try {
-      const ev = JSON.parse(localStorage.getItem('gavan_client_events')||'[]');
-      ev.push({name: clientById(a.clientId).name, at: now(), action: txt});
-      localStorage.setItem('gavan_client_events', JSON.stringify(ev));
-    } catch (e) {}
-  }
+  if (action==='Лид получен') txt = `Лид ${a.id} получен · ${details}`;
+  else if (action==='Назначен менеджер') txt = `По лиду ${a.id} назначен менеджер ${details}`;
+  else if (action==='Снят менеджер') txt = `По лиду ${a.id} снят менеджер ${details}`;
+  else if (action==='Назначен сотрудник') txt = `По лиду ${a.id} назначен сотрудник ${details}`;
+  else if (action==='Снят сотрудник') txt = `По лиду ${a.id} снят сотрудник ${details}`;
+  else if (action==='Добавлен объект') txt = `По лиду ${a.id} добавлен объект «${details}»`;
+  else if (action==='Статус изменён') txt = `Лид ${a.id}: ${details}`;
+  else if (action==='Причина') txt = `Лид ${a.id} не квалифицирован. Причина: ${details}`;
+  else txt = `По лиду ${a.id}: ${details||action}`;
+  clientHistory[a.clientId].push({at:now(), action:txt});
 };
 
-const esc = s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
-const badge = (t,cls)=>`<span class="badge ${cls}">${t}</span>`;
-
+/* Фильтры категорий */
+let fRoot = '', fService = '';
 const board=document.getElementById('board'), empty=document.getElementById('empty');
 const q=document.getElementById('q'), fSource=document.getElementById('fSource'),
       fManager=document.getElementById('fManager'), fEmployee=document.getElementById('fEmployee');
 
+function updateRootCards(){
+  const homeN = applications.filter(a=>a.cat?.root==='home').length;
+  const bizN = applications.filter(a=>a.cat?.root==='biz').length;
+  cntHome.textContent = homeN;
+  cntBiz.textContent = bizN;
+  rootHome.classList.toggle('on-home', fRoot==='home');
+  rootBiz.classList.toggle('on-biz', fRoot==='biz');
+}
+function renderSvcChips(){
+  const wrap = document.getElementById('svcChips');
+  const list = [];
+  Object.values(CATALOG).forEach(root=>{
+    if (fRoot && root.id !== fRoot) return;
+    root.services.forEach(s=>list.push({root:root.id, tone:root.tone, id:s.id, label:s.label}));
+  });
+  wrap.innerHTML = list.map(s=>`
+    <button type="button" class="svc-chip${fService===s.id?' on':''}" data-svc="${s.id}" data-root="${s.root}">
+      <span class="dot ${s.tone}"></span>${esc(s.label)}
+    </button>`).join('');
+}
 function filtered(){
   const s=q.value.trim().toLowerCase();
   return applications.filter(a=>{
     const cl=clientById(a.clientId);
     const objs=a.objectIds.map(o=>objById(o).name).join(' ');
-    const hay=[a.id,a.title,a.information,cl.name,cl.phone,objs,a.source].join(' ').toLowerCase();
+    const path=catPath(a.cat).map(p=>p.text).join(' ');
+    const hay=[a.id,a.title,a.information,cl.name,cl.phone,objs,a.source,path].join(' ').toLowerCase();
     return (!s||hay.includes(s))
       &&(!fSource.value||a.source===fSource.value)
       &&(!fManager.value||(fManager.value==='none'?!a.managerId:a.managerId===fManager.value))
-      &&(!fEmployee.value||(fEmployee.value==='none'?!a.employeeId:a.employeeId===fEmployee.value));
+      &&(!fEmployee.value||(fEmployee.value==='none'?!a.employeeId:a.employeeId===fEmployee.value))
+      &&(!fRoot||a.cat?.root===fRoot)
+      &&(!fService||a.cat?.service===fService);
   });
 }
 const card = a => {
   const cl=clientById(a.clientId);
+  const root = CATALOG[a.cat?.root];
+  const leaf = catPath(a.cat).slice(1).map(p=>p.text);
   return `<div class="kanban-card" draggable="true" data-id="${a.id}">
-    <div style="display:flex;justify-content:space-between;gap:6px"><b>${a.id}</b>${badge(a.source,'gray')}</div>
-    <div style="font-weight:600;margin-top:4px">${esc(a.title)}</div>
-    <div class="c-sub">${esc(cl.name)}</div>
-    <div class="c-sub">${a.objectIds.length} объект(а)</div>
-    <div class="c-sub">М: ${a.managerId?esc(a.managerId):'—'} · С: ${a.employeeId?esc(a.employeeId):'—'}</div>
-    <div class="c-sub" style="margin-top:4px">${a.createdAt}</div>
+    <div style="display:flex;justify-content:space-between;gap:6px;align-items:flex-start">
+      <b>${a.id}</b>
+      ${root?badge(root.short, root.tone):''}
+    </div>
+    <div class="cat-path" style="margin-top:6px">
+      ${leaf.map(t=>`<span class="badge leaf">${esc(t)}</span>`).join('<span class="sep">›</span>')||'<span class="c-sub">Без категории</span>'}
+    </div>
+    <div class="c-sub" style="margin-top:6px">${esc(cl.name)} · ${badge(a.source,'gray')}</div>
+    <div class="c-sub">${a.objectIds.length} объект(а) · М: ${a.managerId?esc(a.managerId.split(' ')[0]):'—'}</div>
+    <div class="c-sub">${a.createdAt}</div>
   </div>`;
 };
 function render(){
+  updateRootCards();
+  renderSvcChips();
   const rows=filtered();
   empty.style.display = rows.length ? 'none' : '';
   board.style.display = rows.length ? 'flex' : 'none';
@@ -313,15 +644,28 @@ function render(){
     const items=rows.filter(a=>a.status===st);
     return `<div class="kanban-col ${cls}">
       <h4>${title} <span class="cnt">${items.length}</span></h4>
+      <div class="c-sub" style="margin:-4px 0 8px">${RACI[st]||''}</div>
       <div class="kanban-cards" data-s="${st}">
-        ${items.map(card).join('')||'<div class="c-sub" style="text-align:center;padding:12px 4px">Нет заявок</div>'}
+        ${items.map(card).join('')||'<div class="c-sub" style="text-align:center;padding:12px 4px">Нет лидов</div>'}
       </div>
     </div>`;
   }).join('');
 }
-function resetFilters(){ q.value='';fSource.value='';fManager.value='';fEmployee.value=''; render(); }
+function resetFilters(){
+  q.value='';fSource.value='';fManager.value='';fEmployee.value='';
+  fRoot=''; fService=''; render();
+}
 [q,fSource,fManager,fEmployee].forEach(el=>{el.addEventListener('input',render);el.addEventListener('change',render);});
 btnReset.onclick=resetFilters; btnReset2.onclick=resetFilters;
+rootHome.onclick=()=>{ fRoot = fRoot==='home'?'':'home'; if(fRoot!=='home') fService=''; else if(fService && !findService('home',fService)) fService=''; render(); };
+rootBiz.onclick=()=>{ fRoot = fRoot==='biz'?'':'biz'; if(fRoot!=='biz') fService=''; else if(fService && !findService('biz',fService)) fService=''; render(); };
+svcChips.onclick=e=>{
+  const b=e.target.closest('.svc-chip'); if(!b) return;
+  const id=b.dataset.svc, root=b.dataset.root;
+  if(fService===id){ fService=''; }
+  else { fService=id; fRoot=root; }
+  render();
+};
 
 /* Drag & drop */
 let dragId=null, suppressUntil=0;
@@ -354,7 +698,7 @@ board.addEventListener('drop',e=>{
   if(ns==='LOST'){ openLost(a); render(); suppressUntil=Date.now()+150; return; }
   pushHist(a,'Статус изменён',`${STATUSES[a.status][0]} → ${STATUSES[ns][0]}`);
   a.status=ns;
-  if(ns==='WON') toast(`Заявка ${a.id} выиграна`);
+  if(ns==='QUALIFIED') toast(`Лид ${a.id} квалифицирован`);
   render();
   if(cur===a) openDrawer(a);
   suppressUntil=Date.now()+150;
@@ -379,19 +723,129 @@ function openDrawer(a){
    <div class="card">
     <div class="drawer-head">
       <div>
-        <div style="font-size:18px;font-weight:700">Заявка ${a.id} ${badge(...STATUSES[a.status])}</div>
+        <div style="font-size:18px;font-weight:700">Лид ${a.id} ${badge(...STATUSES[a.status])}</div>
         <div class="c-sub" style="margin-top:4px">${esc(a.title)}</div>
       </div>
       <button class="drawer-close" onclick="closeDrawer()">✕</button>
     </div>
    </div>
 
+   <div class="card" style="margin-top:12px"><b>Ответственные</b>
+     <label class="field" style="margin-top:10px"><span>Менеджер</span>
+       <select class="input" id="dManager"><option value="">Не назначен</option>
+         ${MANAGERS.map(m=>`<option ${a.managerId===m?'selected':''}>${m}</option>`).join('')}</select></label>
+     <label class="field" style="margin-bottom:0"><span>Сотрудник</span>
+       <select class="input" id="dEmployee"><option value="">Не назначен</option>
+         ${EMPLOYEES.map(m=>`<option ${a.employeeId===m?'selected':''}>${m}</option>`).join('')}</select></label>
+   </div>
+
+   <div class="card" style="margin-top:12px"><b>Категория</b>
+     <div style="margin-top:8px">${catPathHtml(a.cat)}</div>
+     <div class="c-sub" style="margin-top:8px">${RACI[a.status]||''}</div>
+   </div>
+
+   ${a.status==='RECEIVED'?`<div class="card" style="margin-top:12px"><b>Квалификация</b>
+     <div class="c-sub" style="margin-top:6px">Скрипт появится после перевода в «Квалификация» (менеджер продаж).</div>
+     <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+       <span class="btn sm primary" id="btnStartQual">→ Взять в квалификацию</span>
+     </div>
+     <div class="qual-mistakes">
+       <b>Типичные ошибки</b>
+       <ul>
+         <li>заявки в мессенджерах теряются;</li>
+         <li>нет единого места хранения;</li>
+         <li>не фиксируется источник (потом не понять, что работает).</li>
+       </ul>
+     </div>
+   </div>`:`<div class="card" style="margin-top:12px"><b>Квалификация</b>
+     <div class="c-sub" style="margin-top:4px">Цель: понять, подходит ли клиент, и собрать данные для точной сметы.</div>
+     <div class="qual-script">
+       <div class="qual-block">
+         <h4>1. Тип уборки</h4>
+         <div class="check-row" id="qCleanType">
+           ${CLEAN_TYPES.map(t=>radioPill('qCleanType',t,a.qualify?.cleanType===t)).join('')}
+         </div>
+       </div>
+       <div class="qual-block">
+         <h4>2. Объект</h4>
+         <div class="check-row" style="margin-bottom:10px" id="qObjType">
+           ${OBJ_TYPES.map(t=>radioPill('qObjType',t,a.qualify?.objType===t)).join('')}
+         </div>
+         <div class="qual-grid">
+           <label class="field" style="margin:0"><span>Площадь, м²</span><input class="input" id="qArea" value="${esc(a.qualify?.area||'')}"></label>
+           <label class="field" style="margin:0"><span>Комнат</span><input class="input" id="qRooms" value="${esc(a.qualify?.rooms||'')}" placeholder="—"></label>
+           <label class="field" style="margin:0"><span>Санузлов</span><input class="input" id="qBaths" value="${esc(a.qualify?.baths||'')}"></label>
+         </div>
+       </div>
+       <div class="qual-block">
+         <h4>3. Состояние</h4>
+         <div class="qual-grid">
+           <label class="field full" style="margin:0"><span>Степень загрязнения</span>
+             <select class="input" id="qDirt"><option value="">—</option>
+               ${DIRT_LEVELS.map(d=>`<option ${a.qualify?.dirt===d?'selected':''}>${d}</option>`).join('')}
+             </select></label>
+           <div class="full" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:2px">
+             ${pill('qPets','1',!!a.qualify?.pets,'Животные')}
+             ${pill('qKids','1',!!a.qualify?.kids,'Дети')}
+           </div>
+           <label class="field full" style="margin:0"><span>Особые зоны</span>
+             <input class="input" id="qSpecial" value="${esc(a.qualify?.specialZones||'')}" placeholder="кухня, лоджия, после стройки…"></label>
+         </div>
+       </div>
+       <div class="qual-block">
+         <h4>4. Допуслуги</h4>
+         <div class="check-row" id="qExtras">
+           ${EXTRA_OPTS.map(x=>pill('qExtra',x,(a.qualify?.extras||[]).includes(x))).join('')}
+         </div>
+       </div>
+       <div class="qual-block">
+         <h4>5. Адрес, зона, дата/время</h4>
+         <div class="qual-grid">
+           <label class="field full" style="margin:0"><span>Адрес</span><input class="input" id="qAddr" value="${esc(a.qualify?.address||'')}"></label>
+           <label class="field" style="margin:0"><span>Зона выезда</span>
+             <select class="input" id="qZone"><option value="">— проверить —</option>
+               <option value="ok" ${a.qualify?.zone==='ok'?'selected':''}>В зоне</option>
+               <option value="edge" ${a.qualify?.zone==='edge'?'selected':''}>Край зоны</option>
+               <option value="out" ${a.qualify?.zone==='out'?'selected':''}>Вне зоны</option>
+             </select></label>
+           <label class="field" style="margin:0"><span>Желаемая дата</span><input class="input" id="qWish" value="${esc(a.qualify?.wishDate||'')}" placeholder="дата / дни недели"></label>
+           <label class="field" style="margin:0"><span>Желаемое время</span><input class="input" id="qWishTime" value="${esc(a.qualify?.wishTime||'')}" placeholder="утро / день / вечер"></label>
+         </div>
+       </div>
+       <div class="qual-block">
+         <h4>6. Бюджетные ожидания</h4>
+         <label class="field" style="margin:0"><span>Бюджет</span>
+           <input class="input" id="qBudget" value="${esc(a.qualify?.budget||'')}" placeholder="диапазон или «по смете»"></label>
+       </div>
+       <div class="qual-block">
+         <h4>7. Источник лида</h4>
+         <label class="field" style="margin:0"><span>Источник</span>
+           <select class="input" id="qSource">
+             ${LEAD_SOURCES.map(s=>`<option ${a.source===s?'selected':''}>${s}</option>`).join('')}
+           </select></label>
+       </div>
+     </div>
+     <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+       <span class="btn sm primary" id="btnSaveQual">Сохранить скрипт</span>
+       ${a.status==='QUALIFICATION'?`<span class="btn sm" id="btnMarkQual">→ Квалифицирован</span>`:''}
+       ${a.qualify?.zone==='out'?`<span class="c-sub" style="align-self:center;color:var(--danger)">Вне зоны — возможен отказ</span>`:''}
+     </div>
+     <div class="qual-mistakes">
+       <b>Типичные ошибки</b>
+       <ul>
+         <li>не спросили про допуслуги → недозаработали;</li>
+         <li>не проверили зону → сорванный выезд;</li>
+         <li>не уточнили состояние → недооценка трудоёмкости.</li>
+       </ul>
+     </div>
+   </div>`}
+
    <div class="card" style="margin-top:12px"><b>Информация</b>
-     <p style="margin:8px 0 10px;font-size:14px">${esc(a.information)}</p>
+     <p style="margin:8px 0 10px;font-size:14px">${esc(a.information)||'<span class="c-sub">Нет доп. информации</span>'}</p>
      <div class="kv"><b>Источник:</b> ${badge(a.source,'gray')}</div>
      <div class="kv"><b>Клиент:</b> <a href="clients.html">${esc(cl.name)}</a> · ${esc(cl.phone)}</div>
      <div class="kv"><b>Дата:</b> ${a.createdAt}</div>
-     ${a.status==='LOST'?`<div class="kv"><b>Причина потери:</b> ${REASONS[a.lostReason]}${a.lostComment?` — ${esc(a.lostComment)}`:''}</div>`:''}
+     ${a.status==='LOST'?`<div class="kv"><b>Причина:</b> ${REASONS[a.lostReason]}${a.lostComment?` — ${esc(a.lostComment)}`:''}</div>`:''}
    </div>
 
    <div class="card" style="margin-top:12px"><b>Объекты</b>
@@ -405,20 +859,11 @@ function openDrawer(a){
    </div>
 
    <div class="card" style="margin-top:12px">
-     <label class="field"><span>Менеджер</span>
-       <select class="input" id="dManager"><option value="">Не назначен</option>
-         ${MANAGERS.map(m=>`<option ${a.managerId===m?'selected':''}>${m}</option>`).join('')}</select></label>
-     <label class="field" style="margin-bottom:0"><span>Сотрудник</span>
-       <select class="input" id="dEmployee"><option value="">Не назначен</option>
-         ${EMPLOYEES.map(m=>`<option ${a.employeeId===m?'selected':''}>${m}</option>`).join('')}</select></label>
-   </div>
-
-   <div class="card" style="margin-top:12px">
      <label class="field" style="margin-bottom:0"><span>Статус</span>
        <select class="input" id="dStatus">
          ${Object.entries(STATUSES).map(([k,[t]])=>`<option value="${k}" ${a.status===k?'selected':''}>${t}</option>`).join('')}
        </select></label>
-     ${a.status==='WON'?`<a class="btn primary" href="deals.html?from=${a.id.slice(1)}" style="margin-top:10px">Создать сделку →</a>`:''}
+     ${a.status==='QUALIFIED'?`<a class="btn primary" href="deals.html?from=${a.id.slice(1)}" style="margin-top:10px">Создать сделку →</a>`:''}
    </div>
 
    <div class="card" style="margin-top:12px"><b>Заметки</b>
@@ -430,6 +875,49 @@ function openDrawer(a){
    </div>`;
   drawer.classList.add('open'); backdrop.classList.add('open');
 
+  document.getElementById('btnStartQual')?.addEventListener('click',()=>{
+    pushHist(a,'Статус изменён',`${STATUSES[a.status][0]} → Квалификация`);
+    a.status='QUALIFICATION';
+    if(!a.qualify) a.qualify={cleanType:'',objType:'',area:'',rooms:'',baths:'',dirt:'',pets:false,kids:false,specialZones:'',extras:[],address:'',zone:'',wishDate:'',wishTime:'',budget:''};
+    render(); openDrawer(a); toast('Лид в квалификации');
+  });
+  const saveQual=()=>{
+    if(!document.getElementById('qSource')) return;
+    const cleanType=document.querySelector('input[name="qCleanType"]:checked')?.value||'';
+    const objType=document.querySelector('input[name="qObjType"]:checked')?.value||'';
+    const extras=[...document.querySelectorAll('input[name="qExtra"]:checked')].map(el=>el.value);
+    const source=document.getElementById('qSource').value;
+    a.qualify={
+      cleanType, objType,
+      area:document.getElementById('qArea').value.trim(),
+      rooms:document.getElementById('qRooms').value.trim(),
+      baths:document.getElementById('qBaths').value.trim(),
+      dirt:document.getElementById('qDirt').value,
+      pets:!!document.querySelector('input[name="qPets"]:checked'),
+      kids:!!document.querySelector('input[name="qKids"]:checked'),
+      specialZones:document.getElementById('qSpecial').value.trim(),
+      extras,
+      zone:document.getElementById('qZone').value,
+      address:document.getElementById('qAddr').value.trim(),
+      wishDate:document.getElementById('qWish').value.trim(),
+      wishTime:document.getElementById('qWishTime').value.trim(),
+      budget:document.getElementById('qBudget').value.trim(),
+    };
+    if(source && source!==a.source) a.source=source;
+  };
+  document.getElementById('btnSaveQual')?.addEventListener('click',()=>{
+    saveQual();
+    pushHist(a,'Квалификация','Скрипт обновлён');
+    toast('Скрипт квалификации сохранён');
+    openDrawer(a); render();
+  });
+  document.getElementById('btnMarkQual')?.addEventListener('click',()=>{
+    saveQual();
+    if(a.qualify.zone==='out'){ toast('Объект вне зоны — уточните отказ или партнёра',true); }
+    pushHist(a,'Статус изменён',`${STATUSES[a.status][0]} → Квалифицирован`);
+    a.status='QUALIFIED';
+    render(); openDrawer(a); toast(`Лид ${a.id} квалифицирован`);
+  });
   document.getElementById('dManager').onchange=e=>{
     const v=e.target.value||null;
     if(v===a.managerId) return;
@@ -461,7 +949,7 @@ function openDrawer(a){
     if(ns==='LOST'){ e.target.value=a.status; openLost(a); return; }
     pushHist(a,'Статус изменён',`${STATUSES[a.status][0]} → ${STATUSES[ns][0]}`);
     a.status=ns;
-    if(ns==='WON') toast(`Заявка ${a.id} выиграна`);
+    if(ns==='QUALIFIED') toast(`Лид ${a.id} квалифицирован`);
     render(); openDrawer(a);
   };
 }
@@ -475,10 +963,91 @@ document.getElementById('btnLostSave').onclick=()=>{
   const r=document.getElementById('lostReason').value;
   if(!r){document.getElementById('eReason').style.display='block';return;}
   const a=lostTarget;
-  pushHist(a,'Статус изменён',`${STATUSES[a.status][0]} → Потеряна`);
+  pushHist(a,'Статус изменён',`${STATUSES[a.status][0]} → Не квалифицирован`);
   a.status='LOST'; a.lostReason=r; a.lostComment=document.getElementById('lostComment').value.trim();
-  pushHist(a,'Причина потери',REASONS[r]);
+  pushHist(a,'Причина',REASONS[r]);
   closeLost(); render(); if(cur===a)openDrawer(a);
+};
+
+/* Category picker state */
+let draftCat = { root:null, service:null, child:null, option:null };
+
+function updateCatSummary(){
+  const el = document.getElementById('nCatSummary');
+  if (!draftCat.root) {
+    el.className = 'pick-summary empty';
+    el.textContent = 'Категория не выбрана';
+    return;
+  }
+  el.className = 'pick-summary';
+  el.innerHTML = '<b>Выбрано:</b> ' + catPath(draftCat).map(p => esc(p.text)).join(' › ');
+}
+function renderPickServices(){
+  const sec = document.getElementById('secService');
+  const grid = document.getElementById('pickServices');
+  if (!draftCat.root) { sec.style.display='none'; return; }
+  sec.style.display='';
+  const services = CATALOG[draftCat.root].services;
+  grid.innerHTML = services.map(s=>`
+    <button type="button" class="pick-card${draftCat.service===s.id?' on':''}" data-svc="${s.id}">
+      <span class="mark"></span><span>${esc(s.label)}</span>
+    </button>`).join('');
+}
+function renderPickChildren(){
+  const sec = document.getElementById('secChild');
+  const grid = document.getElementById('pickChildren');
+  const svc = findService(draftCat.root, draftCat.service);
+  if (!svc?.children) { sec.style.display='none'; return; }
+  sec.style.display='';
+  document.getElementById('lblChild').textContent = `3. ${svc.childLabel || 'Уточнение'}`;
+  grid.innerHTML = svc.children.map(c=>`
+    <button type="button" class="pick-card${draftCat.child===c.id?' on':''}" data-child="${c.id}">
+      <span class="mark"></span><span>${esc(c.label)}</span>
+    </button>`).join('');
+}
+function renderPickOptions(){
+  const sec = document.getElementById('secOpt');
+  const wrap = document.getElementById('pickOptions');
+  const svc = findService(draftCat.root, draftCat.service);
+  let opts = null, label = '4. Параметр';
+  if (svc?.children && draftCat.child) {
+    const ch = findChild(svc, draftCat.child);
+    if (ch?.options) { opts = ch.options; label = `4. ${ch.optLabel || 'Параметр'}`; }
+  } else if (svc?.options) {
+    opts = svc.options; label = `3. ${svc.childLabel || 'Параметр'}`;
+  }
+  if (!opts) { sec.style.display='none'; return; }
+  sec.style.display='';
+  document.getElementById('lblOpt').textContent = label;
+  wrap.innerHTML = opts.map(o=>`
+    <button type="button" class="pick-opt${draftCat.option===o?' on':''}" data-opt="${esc(o)}">${esc(o)}</button>
+  `).join('');
+}
+function refreshPicker(){
+  document.getElementById('pickHome').className = `pick-root${draftCat.root==='home'?' on home':''}`;
+  document.getElementById('pickBiz').className = `pick-root${draftCat.root==='biz'?' on biz':''}`;
+  renderPickServices();
+  renderPickChildren();
+  renderPickOptions();
+  updateCatSummary();
+}
+
+document.getElementById('pickHome').onclick=()=>{ draftCat={root:'home',service:null,child:null,option:null}; refreshPicker(); };
+document.getElementById('pickBiz').onclick=()=>{ draftCat={root:'biz',service:null,child:null,option:null}; refreshPicker(); };
+document.getElementById('pickServices').onclick=e=>{
+  const b=e.target.closest('.pick-card'); if(!b) return;
+  draftCat={...draftCat, service:b.dataset.svc, child:null, option:null};
+  refreshPicker();
+};
+document.getElementById('pickChildren').onclick=e=>{
+  const b=e.target.closest('.pick-card'); if(!b) return;
+  draftCat={...draftCat, child:b.dataset.child, option:null};
+  refreshPicker();
+};
+document.getElementById('pickOptions').onclick=e=>{
+  const b=e.target.closest('.pick-opt'); if(!b) return;
+  draftCat={...draftCat, option:b.dataset.opt};
+  refreshPicker();
 };
 
 /* New application modal */
@@ -488,7 +1057,9 @@ function openNew(){
   document.getElementById('nObjects').innerHTML=OBJECTS.map(o=>`<label style="display:flex;gap:8px;padding:3px 0"><input type="checkbox" value="${o.id}"> ${esc(o.name)} <span class="c-sub">${esc(o.type)}</span></label>`).join('');
   ['nSource','nClient','nInfo','nManager','nEmployee'].forEach(id=>document.getElementById(id).value='');
   document.querySelectorAll('#nObjects input').forEach(i=>i.checked=false);
-  ['eSource','eClient','eInfo'].forEach(id=>document.getElementById(id).style.display='none');
+  ['eSource','eClient','eCat'].forEach(id=>document.getElementById(id).style.display='none');
+  draftCat={root:null,service:null,child:null,option:null};
+  refreshPicker();
   modalNew.style.display='flex';
 }
 function closeNew(){modalNew.style.display='none';}
@@ -499,24 +1070,25 @@ document.getElementById('btnCreate').onclick=()=>{
         cid=document.getElementById('nClient').value,
         info=document.getElementById('nInfo').value.trim();
   let ok=true;
+  document.getElementById('eCat').style.display=catComplete(draftCat)?'none':'block'; if(!catComplete(draftCat))ok=false;
   document.getElementById('eSource').style.display=src?'none':'block'; if(!src)ok=false;
   document.getElementById('eClient').style.display=cid?'none':'block'; if(!cid)ok=false;
-  document.getElementById('eInfo').style.display=info?'none':'block'; if(!info)ok=false;
   if(!ok) return;
+  const cat={...draftCat};
   const num=Math.max(...applications.map(a=>+a.id.slice(1)))+1;
-  const a={id:'#'+num, title:info.split(/[.\n]/)[0].slice(0,60)||'Заявка', source:src, clientId:cid,
+  const a={id:'#'+num, title:catTitle(cat), source:src, clientId:cid, cat,
     information:info, managerId:document.getElementById('nManager').value||null,
     employeeId:document.getElementById('nEmployee').value||null,
     objectIds:[...document.querySelectorAll('#nObjects input:checked')].map(i=>i.value),
-    status:'RECEIVED', createdAt:now(), history:[H(now(),'Заявка получена',`Источник: ${src.toLowerCase()}`)]};
+    status:'RECEIVED', createdAt:now(), history:[H(now(),'Лид получен',`Источник: ${src.toLowerCase()} · ${catPath(cat).map(p=>p.text).join(' › ')}`)]};
   applications.unshift(a);
-  clientHistory[cid].push({at:now(),action:`Заявка ${a.id} получена · ${src}`});
+  clientHistory[cid].push({at:now(),action:`Лид ${a.id} получен · ${src}`});
   try {
     const ev = JSON.parse(localStorage.getItem('gavan_client_events')||'[]');
-    ev.push({name: clientById(cid).name, at: now(), action: `Заявка ${a.id} получена · ${src}`});
+    ev.push({name: clientById(cid).name, at: now(), action: `Лид ${a.id} получен · ${src}`});
     localStorage.setItem('gavan_client_events', JSON.stringify(ev));
   } catch (e) {}
-  closeNew(); render(); toast(`Заявка ${a.id} создана`);
+  closeNew(); render(); toast(`Лид ${a.id} создан`);
 };
 function toast(msg,err){
   const t=document.createElement('div'); t.className='toast';

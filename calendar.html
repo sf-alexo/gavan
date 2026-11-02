@@ -66,7 +66,8 @@
         <select class="input" id="fStatus" style="flex:1; min-width:120px">
           <option value="">Статус: все</option>
           <option value="scheduled">Запланирован</option><option value="confirmed">Подтверждён</option>
-          <option value="in_progress">В работе</option><option value="completed">Выполнен</option><option value="cancelled">Отменён</option>
+          <option value="in_progress">В работе</option><option value="quality_check">На проверке</option>
+          <option value="completed">Выполнен</option><option value="cancelled">Отменён</option>
         </select>
         <span class="seg2" id="views">
           <button data-v="day" class="on">День</button>
@@ -88,8 +89,15 @@
 <div class="toast-wrap" id="toasts"></div>
 
 <script>
-const STATUS = { scheduled:['Запланирован','#dbeafe','#1e40af'], confirmed:['Подтверждён','#cffafe','#155e75'],
-  in_progress:['В работе','#fef3c7','#92400e'], completed:['Выполнен','#dcfce7','#166534'], cancelled:['Отменён','#e5e7eb','#6b7280'] };
+const STATUS = {
+  scheduled:['Запланирован','#dbeafe','#1e40af'],
+  confirmed:['Подтверждён','#cffafe','#155e75'],
+  in_progress:['В работе','#fef3c7','#92400e'],
+  quality_check:['На проверке','#ede9fe','#5b21b6'],
+  completed:['Выполнен','#dcfce7','#166534'],
+  cancelled:['Отменён','#e5e7eb','#6b7280'],
+};
+const STATUS_BADGE = { scheduled:'blue', confirmed:'blue', in_progress:'amber', quality_check:'purple', completed:'green', cancelled:'gray' };
 const ME = 'Игорь Серов';
 const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 const badge=(t,cls)=>`<span class="badge ${cls}">${t}</span>`;
@@ -185,7 +193,7 @@ function render(){
             <div><b>Услуга:</b> ${esc(o.service)}</div>
             <div class="c-sub">${range(o)}</div>
           </span>
-          ${badge(STATUS[o.status][0],{scheduled:'blue',confirmed:'blue',in_progress:'amber',completed:'green',cancelled:'gray'}[o.status])}
+          ${badge(STATUS[o.status][0],STATUS_BADGE[o.status])}
         </div>`).join('')}</div>`;
     }).join(''):'<div class="card empty">Нет заказов в выбранном периоде</div>';
   }

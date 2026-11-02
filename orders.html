@@ -91,9 +91,10 @@
       <a href="dashboard.html">Дашборд</a>
       <a href="clients.html">Клиенты</a>
       <a href="objects.html">Объекты</a>
-      <a href="leads.html">Заявки</a>
+      <a href="leads.html">Лиды</a>
       <a href="deals.html">Сделки</a>
       <a href="orders.html" class="active">Заказы</a>
+      <a href="employees.html">Сотрудники</a>
       <a href="tasks.html">Задачи</a>
       <a href="history.html">История</a>
     </nav>
@@ -109,7 +110,7 @@
             <div class="dd-title">Уведомления</div>
             <a href="order-quality.html">ORD-SEED-003 сдан на проверку</a>
             <a href="deals.html">Сделка «Вектра» выиграна · 96 000 ₽</a>
-            <a href="leads.html">Новая заявка с сайта</a>
+            <a href="leads.html">Новый лид с сайта</a>
           </div>
         </details>
         <details class="dd">
@@ -152,7 +153,8 @@
         <select class="input" id="fStatus" style="max-width:170px">
           <option value="">Статус: все</option>
           <option value="scheduled">Запланирован</option><option value="confirmed">Подтверждён</option>
-          <option value="in_progress">В работе</option><option value="completed">Выполнен</option><option value="cancelled">Отменён</option>
+          <option value="in_progress">В работе</option><option value="quality_check">На проверке</option>
+          <option value="completed">Выполнен</option><option value="cancelled">Отменён</option>
         </select>
         <select class="input" id="fEmp" style="max-width:160px">
           <option value="">Исполнитель: все</option><option>Иван Петров</option><option>Олег Иванов</option><option>Сергей Петров</option><option value="none">Не назначен</option>
@@ -227,8 +229,17 @@
 <div class="toast-wrap" id="toasts"></div>
 
 <script>
-const STATUS = { scheduled:['Запланирован','#dbeafe','#1e40af'], confirmed:['Подтверждён','#cffafe','#155e75'],
-  in_progress:['В работе','#fef3c7','#92400e'], completed:['Выполнен','#dcfce7','#166534'], cancelled:['Отменён','#e5e7eb','#6b7280'] };
+const STATUS = {
+  scheduled:['Запланирован','#dbeafe','#1e40af'],
+  confirmed:['Подтверждён','#cffafe','#155e75'],
+  in_progress:['В работе','#fef3c7','#92400e'],
+  quality_check:['На проверке','#ede9fe','#5b21b6'],
+  completed:['Выполнен','#dcfce7','#166534'],
+  cancelled:['Отменён','#e5e7eb','#6b7280'],
+};
+const STATUS_BADGE = { scheduled:'blue', confirmed:'blue', in_progress:'amber', quality_check:'purple', completed:'green', cancelled:'gray' };
+const TIMELINE = ['Запланирован','Подтверждён','В работе','На проверке','Выполнен'];
+const TIMELINE_DONE = { scheduled:1, confirmed:2, in_progress:3, quality_check:4, completed:5, cancelled:0 };
 const ME = 'Иван Петров';
 const EMPLOYEES = ['Иван Петров','Олег Иванов','Сергей Петров'];
 const CLIENTS = [
@@ -257,6 +268,7 @@ const orders=[
  O(505,'cl16',292,'o19','Уборка подъездов','2026-10-05','08:00','10:00','completed','Олег Иванов'),
  O(506,'cl17',291,'o20','Утренняя уборка','2026-10-05','07:00','08:30','completed','Сергей Петров'),
  O(502,'cl5',302,'o6','Уборка склада','2026-10-06','09:00','13:00','in_progress','Иван Петров'),
+ O(504,'cl19',289,'o22','Уборка склада','2026-10-06','11:00','14:00','quality_check','Сергей Петров'),
  O(507,'cl9',301,'o11','Уборка офиса','2026-10-06','10:00','12:00','confirmed','Олег Иванов'),
  O(508,'cl17',291,'o20','Утренняя уборка','2026-10-06','07:00','08:30','completed','Сергей Петров'),
  O(509,'cl8',296,'o10','Генеральная уборка дома','2026-10-06','14:00','18:00','scheduled','Иван Петров','Перед заселением'),
@@ -382,7 +394,7 @@ function render(){
         ${byDate[ds].sort((a,b)=>mins(a.start)-mins(b.start)).map(o=>`<div class="sch-row" data-id="${o.id}" style="border-left-color:${STATUS[o.status][2]}">
           <span class="t">${o.start.slice(11,16)}</span>
           <span style="flex:1"><b>${esc(clientById(o.clientId).name)}</b> · ${esc(o.service)}<div class="c-sub">${range(o)} · ${o.employeeId||'не назначен'} · ${esc(objById(o.objectId).name)}</div></span>
-          ${badge(STATUS[o.status][0],{scheduled:'blue',confirmed:'blue',in_progress:'amber',completed:'green',cancelled:'gray'}[o.status])}
+          ${badge(STATUS[o.status][0],STATUS_BADGE[o.status])}
         </div>`).join('')}</div>`;
     }).join(''):'<div class="card empty">Нет заказов в выбранном периоде</div>';
   }
@@ -508,7 +520,7 @@ function openDrawer(o){
    <div class="card">
     <div class="drawer-head">
       <div>
-        <div style="font-size:18px;font-weight:700">Заказ #${o.id} ${badge(STATUS[o.status][0],{scheduled:'blue',confirmed:'blue',in_progress:'amber',completed:'green',cancelled:'gray'}[o.status])}</div>
+        <div style="font-size:18px;font-weight:700">Заказ #${o.id} ${badge(STATUS[o.status][0],STATUS_BADGE[o.status])}</div>
         <div class="c-sub" style="margin-top:4px">${esc(o.service)}</div>
       </div>
       <button class="drawer-close" onclick="closeDrawer()">✕</button>
@@ -516,8 +528,8 @@ function openDrawer(o){
    </div>
    <div class="card" style="margin-top:12px">
      <div class="timeline">
-       ${['Создан','Запланирован','В работе','Проверка качества','Завершён'].map((t,i)=>{
-         const done={scheduled:2,confirmed:2,in_progress:3,completed:5,cancelled:1}[o.status];
+       ${TIMELINE.map((t,i)=>{
+         const done=TIMELINE_DONE[o.status]||0;
          return `<div class="timeline-step${i<done?' done':''}"><div class="dot"></div><div class="label">${t}</div></div>`;
        }).join('')}
      </div>

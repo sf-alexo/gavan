@@ -7,7 +7,8 @@
 <link rel="stylesheet" href="styles.css">
 <style>
   .c-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
-  .kanban-col { display: flex; flex-direction: column; }
+  .kanban-col { display: flex; flex-direction: column; min-width: 168px; }
+  .kanban { overflow-x: auto; }
   .kanban-col .cnt { float: right; }
   .kanban-cards { flex: 1; min-height: 80px; border-radius: 8px; }
   .kanban-cards.drop-over { outline: 2px dashed var(--primary); outline-offset: 2px; background: #e6efff; }
@@ -23,6 +24,13 @@
   .err { color: var(--danger); font-size: 12px; margin-top: 4px; display: none; }
   .ord-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
   .ord-row:last-child { border-bottom: none; }
+  .act-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .photo-ph {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 72px; height: 56px; border-radius: 8px; background: #f3f4f6;
+    border: 1px dashed var(--border); color: var(--muted); font-size: 11px; margin: 4px 4px 0 0;
+  }
+  .raci { font-size: 12px; color: var(--muted); margin-top: 6px; }
 </style>
 </head>
 <body>
@@ -36,9 +44,10 @@
       <a href="dashboard.html">Дашборд</a>
       <a href="clients.html">Клиенты</a>
       <a href="objects.html">Объекты</a>
-      <a href="leads.html">Заявки</a>
+      <a href="leads.html">Лиды</a>
       <a href="deals.html" class="active">Сделки</a>
       <a href="orders.html">Заказы</a>
+      <a href="employees.html">Сотрудники</a>
       <a href="tasks.html">Задачи</a>
       <a href="history.html">История</a>
     </nav>
@@ -53,8 +62,8 @@
           <div class="dd-menu">
             <div class="dd-title">Уведомления</div>
             <a href="order-quality.html">ORD-SEED-003 сдан на проверку</a>
-            <a href="deals.html">Сделка «Вектра» выиграна · 96 000 ₽</a>
-            <a href="leads.html">Новая заявка с сайта</a>
+            <a href="deals.html">Сделка #300 · ждёт технолога по КП</a>
+            <a href="leads.html">Новый лид с сайта</a>
           </div>
         </details>
         <details class="dd">
@@ -76,7 +85,7 @@
       <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap">
         <div>
           <h2 style="margin-bottom:2px">Сделки</h2>
-          <p style="color:var(--muted); margin:0 0 16px; font-size:14px">Коммерческие отношения с клиентами и их текущий статус</p>
+          <p style="color:var(--muted); margin:0 0 16px; font-size:14px">Расчёт/КП → Согласование → Планирование → Выполнение → Закрытие → Постпродажа</p>
         </div>
         <span class="btn primary" id="btnNew">+ Новая сделка</span>
       </div>
@@ -84,17 +93,21 @@
       <div class="grid" style="grid-template-columns:repeat(4,1fr); margin-bottom:16px" id="sum">
         <div class="card sum" data-s=""><div class="num" id="sumAll">0</div><div class="lbl">Все сделки</div></div>
         <div class="card sum" data-s="action"><div class="num" id="sumAct">0</div><div class="lbl">Требуют действия</div></div>
-        <div class="card sum" data-s="in_progress"><div class="num" id="sumWork">0</div><div class="lbl">В работе</div></div>
-        <div class="card sum" data-s="completed"><div class="num" id="sumDone">0</div><div class="lbl">Завершены</div></div>
+        <div class="card sum" data-s="ops"><div class="num" id="sumWork">0</div><div class="lbl">План. + выполнение</div></div>
+        <div class="card sum" data-s="done"><div class="num" id="sumDone">0</div><div class="lbl">Закр. + пост</div></div>
       </div>
 
       <div class="toolbar">
         <input class="input" id="q" style="max-width:320px" placeholder="Поиск по клиенту, сделке или объекту…">
-        <select class="input" id="fStage" style="max-width:160px">
+        <select class="input" id="fStage" style="max-width:200px">
           <option value="">Стадия: все</option>
-          <option value="new">Новые</option><option value="negotiation">Переговоры</option>
-          <option value="approval">Согласование</option><option value="in_progress">В работе</option>
-          <option value="completed">Завершены</option><option value="lost">Потеряны</option>
+          <option value="calculation">Расчёт / КП</option>
+          <option value="approval">Согласование</option>
+          <option value="planning">Планирование</option>
+          <option value="execution">Выполнение</option>
+          <option value="closing">Закрытие</option>
+          <option value="postsale">Постпродажа</option>
+          <option value="lost">Потеряна</option>
         </select>
         <select class="input" id="fManager" style="max-width:170px">
           <option value="">Все менеджеры</option><option>Алексей Смирнов</option><option>Мария Ким</option>
@@ -146,11 +159,11 @@
 
 <div class="modal-backdrop" id="modalDone" style="display:none">
   <div class="modal">
-    <h3>Завершить сделку?</h3>
+    <h3>Закрыть сделку?</h3>
     <p style="color:var(--muted); font-size:14px" id="doneText"></p>
     <div class="actions">
       <span class="btn" onclick="closeDone()">Отмена</span>
-      <span class="btn primary" id="btnDoneOk">Завершить</span>
+      <span class="btn primary" id="btnDoneOk">Закрыть</span>
     </div>
   </div>
 </div>
@@ -162,21 +175,21 @@
       <select class="input" id="nClient"><option value="">— выберите —</option></select>
       <div class="err" id="eClient">Выберите клиента</div>
     </label>
-    <label class="field"><span>Название</span><input class="input" id="nTitle" placeholder="Регулярное обслуживание ООО «…»"></label>
-    <label class="field"><span>Услуга</span><input class="input" id="nService" placeholder="Регулярная уборка"></label>
+    <label class="field"><span>Название</span><input class="input" id="nTitle" placeholder="Генеральная уборка квартиры"></label>
+    <label class="field"><span>Услуга</span><input class="input" id="nService" placeholder="Генеральная уборка"></label>
     <div style="display:flex; gap:10px">
       <label class="field" style="flex:1"><span>Стоимость, ₽</span><input class="input" id="nAmount" type="number" min="0"></label>
       <label class="field" style="flex:1"><span>Период</span>
-        <select class="input" id="nPeriod"><option value="/ месяц">/ месяц</option><option value="">разово</option></select></label>
+        <select class="input" id="nPeriod"><option value="">разово</option><option value="/ месяц">/ месяц</option></select></label>
     </div>
     <div style="display:flex; gap:10px">
-      <label class="field" style="flex:1"><span>Дата начала</span><input class="input" id="nStart" type="date"></label>
-      <label class="field" style="flex:1"><span>Периодичность</span><input class="input" id="nFreq" placeholder="3 раза в неделю"></label>
+      <label class="field" style="flex:1"><span>Дата выезда</span><input class="input" id="nStart" type="date"></label>
+      <label class="field" style="flex:1"><span>Периодичность</span><input class="input" id="nFreq" placeholder="разово"></label>
     </div>
     <label class="field"><span>Менеджер</span>
       <select class="input" id="nManager"><option value="">—</option><option>Алексей Смирнов</option><option>Мария Ким</option></select>
     </label>
-    <label class="field"><span>Условия</span><textarea class="input" id="nCond" rows="2"></textarea></label>
+    <label class="field"><span>Состав работ / условия</span><textarea class="input" id="nCond" rows="2"></textarea></label>
     <label class="field"><span>Объекты</span></label>
     <div id="nObjects" style="border:1px solid var(--border); border-radius:8px; padding:8px 10px; max-height:120px; overflow:auto; font-size:13px"></div>
     <div class="actions">
@@ -189,11 +202,38 @@
 <div class="toast-wrap" id="toasts"></div>
 
 <script>
-const STAGES = { new:['Новая','blue'], negotiation:['Переговоры','amber'], approval:['Согласование','purple'], in_progress:['В работе','green'], completed:['Завершена','gray'], lost:['Потеряна','red'] };
-const COLS = [['new','Новые'],['negotiation','Переговоры'],['approval','Согласование'],['in_progress','В работе'],['completed','Завершены']];
+const STAGES = {
+  calculation:['Расчёт / КП','amber'],
+  approval:['Согласование','purple'],
+  planning:['Планирование','blue'],
+  execution:['Выполнение','green'],
+  closing:['Закрытие','amber'],
+  postsale:['Постпродажа','gray'],
+  lost:['Потеряна','red'],
+};
+const COLS = [
+  ['calculation','Расчёт / КП'],
+  ['approval','Согласование'],
+  ['planning','Планирование'],
+  ['execution','Выполнение'],
+  ['closing','Закрытие'],
+  ['postsale','Постпродажа'],
+];
 const REASONS = { PRICE:'Цена', COMPETITOR:'Выбрали другую компанию', NEEDS:'Изменились потребности', NO_DEAL:'Не удалось договориться', OTHER:'Другое' };
-const O_ST = { 'Запланирован':'blue','В работе':'amber','Выполнен':'green','Отменён':'gray' };
+const O_ST = { 'Запланирован':'blue','Подтверждён':'blue','В работе':'amber','На проверке':'purple','Выполнен':'green','Отменён':'gray' };
 const MANAGERS = ['Алексей Смирнов','Мария Ким'];
+const TECHS = ['Игорь Технолог','Ольга Бригадир'];
+const RACI = {
+  calculation:'Отвечает: менеджер продаж · участвует: технолог (сложные)',
+  approval:'Отвечает: менеджер продаж',
+  planning:'Отвечает: диспетчер · участвует: бригадир',
+  execution:'Отвечает: бригадир · участвует: клинеры',
+  closing:'Отвечает: менеджер / бухгалтер',
+  postsale:'Отвечает: клиентский сервис',
+  lost:'—',
+};
+const OPS = ['planning','execution'];
+const DONE = ['closing','postsale'];
 
 const CLIENTS = [
  {id:'cl1',name:'Анна Петрова',type:'INDIVIDUAL'},
@@ -247,36 +287,61 @@ const naLabel=s=>{if(!s)return'';
   const t=new Date(),tmr=new Date(); tmr.setDate(t.getDate()+1);
   return iso===isoD(t)?'сегодня':iso===isoD(tmr)?'завтра':s;};
 const money=n=>n?n.toLocaleString('ru-RU')+' ₽':'—';
+const TERMINAL = ['postsale','lost'];
 
 let ordersSeq = 504;
 const deals = [
- {id:303,title:'Комплексное обслуживание производства',clientId:'cl6',applicationId:1047,managerId:'Мария Ким',objectIds:['o7','o8'],status:'new',service:'Комплексное обслуживание',amount:480000,amountPeriod:'/ месяц',startDate:'15.10.2026',frequency:'ежедневно',conditions:'Производственный корпус + склад',nextAction:'Созвониться по тендеру',nextActionDate:'завтра',createdAt:'05.10.2026',orders:[],history:[H('05.10.2026 09:00','Система','Сделка создана из заявки #1047')]},
- {id:302,title:'Регулярное обслуживание ООО «Вектор»',clientId:'cl5',applicationId:1048,managerId:'Алексей Смирнов',objectIds:['o5','o6'],status:'in_progress',service:'Регулярная уборка',amount:215000,amountPeriod:'/ месяц',startDate:'01.11.2026',frequency:'3 раза в неделю',conditions:'Регулярное обслуживание офиса и склада',nextAction:'Подтвердить дату начала',nextActionDate:'сегодня',createdAt:'25.10.2026',
-  orders:[{num:501,date:'01.11.2026',service:'Уборка БЦ',status:'Выполнен'},{num:502,date:'03.11.2026',service:'Уборка склада',status:'В работе'},{num:503,date:'05.11.2026',service:'Уборка БЦ',status:'Запланирован'}],
-  history:[H('30.10.2026 14:08','Система','Заявка #1048 одобрена'),H('30.10.2026 14:10','Система','Сделка создана из заявки #1048'),H('31.10.2026 16:20','Алексей Смирнов','Создан заказ #501'),H('01.11.2026 10:30','Алексей Смирнов','Сделка переведена в «В работе»')]},
- {id:301,title:'Регулярная уборка офиса',clientId:'cl9',applicationId:1044,managerId:'Алексей Смирнов',objectIds:['o11'],status:'in_progress',service:'Регулярная уборка',amount:120000,amountPeriod:'/ месяц',startDate:'10.10.2026',frequency:'2 раза в неделю',conditions:'Офис «Стандарт»',nextAction:'Создать следующий заказ',nextActionDate:'08.10.2026',createdAt:'01.10.2026',orders:[{num:498,date:'10.10.2026',service:'Уборка офиса',status:'Запланирован'}],
-  history:[H('01.10.2026 11:00','Система','Сделка создана из заявки #1044'),H('02.10.2026 09:00','Алексей Смирнов','Сделка переведена в «В работе»')]},
- {id:300,title:'Регулярная уборка производства',clientId:'cl10',applicationId:1042,managerId:'Алексей Смирнов',objectIds:['o13'],status:'approval',service:'Регулярная уборка',amount:340000,amountPeriod:'/ месяц',startDate:'01.11.2026',frequency:'ежедневно',conditions:'Производственный корпус «Горизонт»',nextAction:'Подписать договор',nextActionDate:'09.10.2026',createdAt:'30.09.2026',orders:[],history:[H('30.09.2026 10:00','Система','Сделка создана из заявки #1042')]},
- {id:299,title:'Генеральная уборка квартиры',clientId:'cl1',applicationId:1043,managerId:'Мария Ким',objectIds:['o1'],status:'completed',service:'Генеральная уборка',amount:18000,amountPeriod:'',startDate:'30.09.2026',frequency:'разово',conditions:'После ремонта',createdAt:'29.09.2026',orders:[{num:490,date:'30.09.2026',service:'Генеральная уборка',status:'Выполнен'}],
-  history:[H('29.09.2026 12:00','Система','Сделка создана из заявки #1043'),H('30.09.2026 18:00','Мария Ким','Сделка завершена')]},
- {id:298,title:'Уборка дома и мойка окон',clientId:'cl11',applicationId:1041,managerId:'Мария Ким',objectIds:['o14'],status:'completed',service:'Генеральная уборка + окна',amount:24000,amountPeriod:'',startDate:'29.09.2026',frequency:'разово',createdAt:'28.09.2026',orders:[{num:489,date:'29.09.2026',service:'Уборка дома',status:'Выполнен'}],
-  history:[H('28.09.2026 10:00','Система','Сделка создана из заявки #1041'),H('29.09.2026 17:30','Мария Ким','Сделка завершена')]},
- {id:297,title:'Ежедневная уборка БЦ «Орбита»',clientId:'cl7',applicationId:1046,managerId:'Алексей Смирнов',objectIds:['o9'],status:'negotiation',service:'Регулярная уборка',amount:390000,amountPeriod:'/ месяц',startDate:'',frequency:'ежедневно',conditions:'По ночам, 6 дней в неделю',nextAction:'Согласовать график',nextActionDate:'завтра',createdAt:'02.10.2026',orders:[],history:[H('02.10.2026 13:00','Система','Сделка создана из заявки #1046')]},
- {id:296,title:'Уборка дома перед заселением',clientId:'cl8',applicationId:1045,managerId:'Мария Ким',objectIds:['o10'],status:'negotiation',service:'Генеральная уборка',amount:32000,amountPeriod:'',startDate:'',frequency:'разово',nextAction:'Позвонить клиенту',nextActionDate:'сегодня',createdAt:'02.10.2026',orders:[],history:[H('02.10.2026 15:00','Система','Сделка создана из заявки #1045')]},
- {id:295,title:'Обслуживание склада',clientId:'cl4',applicationId:1052,managerId:'',objectIds:['o4'],status:'new',service:'Регулярная уборка',amount:95000,amountPeriod:'/ месяц',frequency:'2 раза в неделю',nextAction:'Назначить менеджера',nextActionDate:'сегодня',createdAt:'06.10.2026',orders:[],history:[H('06.10.2026 08:40','Система','Сделка создана из заявки #1052')]},
- {id:294,title:'Уборка офиса «Меридиан»',clientId:'cl2',managerId:'Алексей Смирнов',objectIds:['o2'],status:'approval',service:'Регулярная уборка',amount:140000,amountPeriod:'/ месяц',startDate:'20.10.2026',frequency:'3 раза в неделю',nextAction:'Ждём подпись клиента',nextActionDate:'10.10.2026',createdAt:'03.10.2026',orders:[],history:[H('03.10.2026 12:00','Мария Ким','Сделка создана вручную')]},
- {id:293,title:'Сеть офисов «Северный ветер»',clientId:'cl15',managerId:'Мария Ким',objectIds:['o18'],status:'in_progress',service:'Регулярная уборка',amount:260000,amountPeriod:'/ месяц',startDate:'01.10.2026',frequency:'ежедневно',nextAction:'Создать следующий заказ',nextActionDate:'07.10.2026',createdAt:'20.09.2026',orders:[{num:495,date:'05.10.2026',service:'Уборка офисов',status:'Выполнен'}],history:[H('20.09.2026 10:00','Система','Сделка создана из заявки #1036')]},
- {id:292,title:'Уборка подъездов ЖК',clientId:'cl16',managerId:'Мария Ким',objectIds:['o19'],status:'in_progress',service:'Поддерживающая уборка',amount:180000,amountPeriod:'/ месяц',startDate:'15.09.2026',frequency:'5 раз в неделю',createdAt:'10.09.2026',orders:[{num:480,date:'04.10.2026',service:'Уборка подъездов',status:'В работе'}],history:[H('10.09.2026 09:00','Система','Сделка создана из заявки #1030')]},
- {id:291,title:'Ежедневная уборка кофейни',clientId:'cl17',managerId:'Мария Ким',objectIds:['o20'],status:'negotiation',service:'Регулярная уборка',amount:75000,amountPeriod:'/ месяц',frequency:'ежедневно, утро',nextAction:'Отправить КП',nextActionDate:'сегодня',createdAt:'05.10.2026',orders:[],history:[H('05.10.2026 11:00','Система','Сделка создана из заявки #1050')]},
- {id:290,title:'Уборка после ремонта',clientId:'cl18',managerId:'Алексей Смирнов',objectIds:['o21'],status:'lost',service:'Генеральная уборка',amount:90000,amountPeriod:'',lostReason:'COMPETITOR',createdAt:'22.09.2026',orders:[],history:[H('22.09.2026 10:00','Система','Сделка создана'),H('28.09.2026 14:00','Алексей Смирнов','Сделка потеряна. Причина: Выбрали другую компанию')]},
- {id:289,title:'Уборка склада «Вектра»',clientId:'cl19',managerId:'Алексей Смирнов',objectIds:['o22'],status:'approval',service:'Генеральная уборка склада',amount:96000,amountPeriod:'',startDate:'12.10.2026',frequency:'разово',nextAction:'Согласовать дату выезда',nextActionDate:'завтра',createdAt:'04.10.2026',orders:[],history:[H('04.10.2026 16:00','Система','Сделка создана из заявки #1049')]},
+ {id:303,title:'Комплексное обслуживание производства',clientId:'cl6',applicationId:1047,managerId:'Мария Ким',objectIds:['o7','o8'],status:'calculation',service:'Послестроительная уборка',amount:480000,amountPeriod:'',frequency:'разово',conditions:'Производственный корпус + склад',nextAction:'Собрать вводные для сметы',nextActionDate:'завтра',createdAt:'05.10.2026',orders:[],payment:null,review:null,tech:null,visit:null,
+  history:[H('05.10.2026 09:00','Система','Сделка создана из лида #1047')]},
+ {id:291,title:'Ежедневная уборка кофейни',clientId:'cl17',managerId:'Мария Ким',objectIds:['o20'],status:'calculation',service:'Премиум клининг · HoReCa',amount:75000,amountPeriod:'',frequency:'разово',conditions:'Утро, до открытия',nextAction:'Отправить черновик КП технологу',nextActionDate:'сегодня',createdAt:'05.10.2026',orders:[],payment:null,review:null,tech:null,visit:null,
+  history:[H('05.10.2026 11:00','Система','Сделка создана из лида #1050'),H('05.10.2026 12:00','Мария Ким','Смета в работе')]},
+ {id:300,title:'Регулярная уборка производства',clientId:'cl10',applicationId:1042,managerId:'Алексей Смирнов',objectIds:['o13'],status:'calculation',service:'Послестроительная уборка',amount:340000,amountPeriod:'',frequency:'разово',conditions:'Сильное загрязнение, нужен пароочиститель',nextAction:'Ждём решение технолога',nextActionDate:'сегодня',createdAt:'30.09.2026',orders:[],payment:null,review:null,
+  tech:{by:null,decision:null,note:'Черновик сметы: 4 чел × 8 ч'},visit:null,
+  history:[H('30.09.2026 10:00','Система','Сделка создана из лида #1042'),H('01.10.2026 09:00','Алексей Смирнов','Черновик КП · привлечён технолог')]},
+ {id:289,title:'Уборка склада «Вектра»',clientId:'cl19',managerId:'Алексей Смирнов',objectIds:['o22'],status:'calculation',service:'Генеральная уборка склада',amount:96000,amountPeriod:'',frequency:'разово',conditions:'Высота потолков 8 м',nextAction:'Проверить надбавку за высоту',nextActionDate:'завтра',createdAt:'04.10.2026',orders:[],payment:null,review:null,
+  tech:{by:null,decision:null,note:''},visit:null,
+  history:[H('04.10.2026 16:00','Система','Сделка создана из лида #1049')]},
+ {id:296,title:'Уборка дома перед заселением',clientId:'cl8',applicationId:1045,managerId:'Мария Ким',objectIds:['o10'],status:'calculation',service:'Генеральная уборка · Коттеджи · от 200 м²',amount:32000,amountPeriod:'',frequency:'разово',nextAction:'Собрать вводные и посчитать КП',nextActionDate:'сегодня',createdAt:'02.10.2026',orders:[],payment:null,review:null,
+  tech:{by:'Игорь Технолог',decision:null,note:'По фото не оценить загрязнение после ремонта — уточнить у клиента'},
+  visit:null,
+  history:[H('02.10.2026 15:00','Система','Сделка создана из лида #1045'),H('03.10.2026 10:00','Игорь Технолог','Нужны доп. вводные для сметы')]},
+ {id:297,title:'Ежедневная уборка БЦ «Орбита»',clientId:'cl7',applicationId:1046,managerId:'Алексей Смирнов',objectIds:['o9'],status:'approval',service:'Премиум клининг · БЦ',amount:390000,amountPeriod:'',frequency:'разово',conditions:'Ночная смена',nextAction:'Согласовать график с клиентом',nextActionDate:'завтра',createdAt:'02.10.2026',orders:[],payment:null,review:null,
+  tech:{by:'Ольга Бригадир',decision:'ok',note:'Типовой объект, технолог подтвердил смету'},visit:null,
+  history:[H('02.10.2026 13:00','Система','Сделка создана из лида #1046'),H('04.10.2026 09:00','Ольга Бригадир','Смета согласована')]},
+ {id:294,title:'Уборка офиса «Меридиан»',clientId:'cl2',managerId:'Алексей Смирнов',objectIds:['o2'],status:'approval',service:'Уборка офисов (по графику)',amount:140000,amountPeriod:'',frequency:'разово',nextAction:'Ждём ответ клиента по КП',nextActionDate:'10.10.2026',createdAt:'03.10.2026',orders:[],payment:null,review:null,
+  tech:{by:'Игорь Технолог',decision:'ok',note:''},visit:null,
+  history:[H('03.10.2026 12:00','Мария Ким','Сделка создана вручную')]},
+ {id:295,title:'Обслуживание склада',clientId:'cl4',applicationId:1052,managerId:'',objectIds:['o4'],status:'approval',service:'Уборка прилегающих территорий',amount:95000,amountPeriod:'',frequency:'разово',nextAction:'Создать заказ и назначить бригаду',nextActionDate:'сегодня',createdAt:'06.10.2026',orders:[],payment:{status:'pending',amount:95000},review:null,
+  tech:{by:'Ольга Бригадир',decision:'ok',note:'Типовой объект'},visit:null,
+  history:[H('06.10.2026 08:40','Система','Сделка создана из лида #1052'),H('06.10.2026 15:00','Клиент','Заказ подтверждён')]},
+ {id:302,title:'Регулярное обслуживание ООО «Вектор»',clientId:'cl5',applicationId:1048,managerId:'Алексей Смирнов',objectIds:['o5','o6'],status:'execution',service:'Уборка офисов (по графику)',amount:215000,amountPeriod:'',frequency:'разово',conditions:'Офис и склад',nextAction:'Контроль приёмки ORD-504',nextActionDate:'сегодня',createdAt:'25.10.2026',
+  orders:[{num:501,date:'01.11.2026',service:'Уборка БЦ',status:'Выполнен'},{num:502,date:'03.11.2026',service:'Уборка склада',status:'В работе'},{num:504,date:'04.11.2026',service:'Уборка склада',status:'На проверке'},{num:503,date:'05.11.2026',service:'Уборка БЦ',status:'Запланирован'}],
+  payment:{status:'partial',amount:215000},review:null,tech:{by:'Игорь Технолог',decision:'ok',note:''},visit:null,
+  history:[H('30.10.2026 14:10','Система','Сделка создана из лида #1048'),H('01.11.2026 10:30','Алексей Смирнов','Планирование → выполнение, заказ #501')]},
+ {id:301,title:'Регулярная уборка офиса',clientId:'cl9',applicationId:1044,managerId:'Алексей Смирнов',objectIds:['o11'],status:'planning',service:'Уборка офисов (по графику)',amount:120000,amountPeriod:'',frequency:'разово',nextAction:'Назначить бригаду на #498',nextActionDate:'сегодня',createdAt:'01.10.2026',orders:[{num:498,date:'10.10.2026',service:'Уборка офиса',status:'Запланирован'}],
+  payment:{status:'pending',amount:120000},review:null,tech:{by:'Ольга Бригадир',decision:'ok',note:''},visit:null,
+  history:[H('01.10.2026 11:00','Система','Сделка создана из лида #1044'),H('01.10.2026 12:00','Диспетчер','Заказ #498 создан — планирование')]},
+ {id:293,title:'Сеть офисов «Северный ветер»',clientId:'cl15',managerId:'Мария Ким',objectIds:['o18'],status:'closing',service:'Уборка офисов (по графику)',amount:260000,amountPeriod:'',frequency:'разово',nextAction:'Проверить оплату и закрыть',nextActionDate:'сегодня',createdAt:'20.09.2026',orders:[{num:495,date:'05.10.2026',service:'Уборка офисов',status:'Выполнен'}],
+  payment:{status:'paid',amount:260000},review:null,tech:null,visit:null,
+  history:[H('20.09.2026 10:00','Система','Сделка создана из лида #1036'),H('06.10.2026 18:00','Бригадир','Заказ выполнен → закрытие')]},
+ {id:292,title:'Уборка подъездов ЖК',clientId:'cl16',managerId:'Мария Ким',objectIds:['o19'],status:'execution',service:'Уборка прилегающих территорий',amount:180000,amountPeriod:'',frequency:'разово',nextAction:'Контроль бригады на объекте',nextActionDate:'сегодня',createdAt:'10.09.2026',orders:[{num:480,date:'04.10.2026',service:'Уборка подъездов',status:'В работе'}],
+  payment:{status:'pending',amount:180000},review:null,tech:null,visit:null,
+  history:[H('10.09.2026 09:00','Система','Сделка создана из лида #1030'),H('04.10.2026 08:00','Бригадир','Старт уборки')]},
+ {id:299,title:'Генеральная уборка квартиры',clientId:'cl1',applicationId:1043,managerId:'Мария Ким',objectIds:['o1'],status:'postsale',service:'Генеральная уборка · Квартиры · 50–100 м²',amount:18000,amountPeriod:'',frequency:'разово',conditions:'После ремонта',createdAt:'29.09.2026',orders:[{num:490,date:'30.09.2026',service:'Генеральная уборка',status:'Выполнен'}],
+  payment:{status:'paid',amount:18000},review:{score:5,text:'Всё чисто, спасибо!',asked:true},tech:null,visit:null,
+  history:[H('29.09.2026 12:00','Система','Сделка создана из лида #1043'),H('30.09.2026 18:00','Мария Ким','Сделка закрыта'),H('01.10.2026 12:00','Клиентский сервис','Получен отзыв 5★ · постпродажа')]},
+ {id:298,title:'Уборка дома и мойка окон',clientId:'cl11',applicationId:1041,managerId:'Мария Ким',objectIds:['o14'],status:'closing',service:'Мойка окон · С двух сторон',amount:24000,amountPeriod:'',frequency:'разово',nextAction:'Зафиксировать оплату',nextActionDate:'сегодня',createdAt:'28.09.2026',orders:[{num:489,date:'29.09.2026',service:'Уборка дома',status:'Выполнен'}],
+  payment:{status:'paid',amount:24000},review:{score:null,text:'',asked:false},tech:null,visit:null,
+  history:[H('28.09.2026 10:00','Система','Сделка создана из лида #1041'),H('29.09.2026 17:30','Мария Ким','Работы завершены → закрытие')]},
+ {id:290,title:'Уборка после ремонта',clientId:'cl18',managerId:'Алексей Смирнов',objectIds:['o21'],status:'lost',service:'Уборка после ремонта',amount:90000,amountPeriod:'',lostReason:'COMPETITOR',createdAt:'22.09.2026',orders:[],payment:null,review:null,tech:null,visit:null,
+  history:[H('22.09.2026 10:00','Система','Сделка создана'),H('28.09.2026 14:00','Алексей Смирнов','Сделка потеряна. Причина: Выбрали другую компанию')]},
 ];
 
 const clientEvent = (deal,text)=>{try{
   const ev=JSON.parse(localStorage.getItem('gavan_client_events')||'[]');
   ev.push({name:clientById(deal.clientId).name, at:now(), action:text});
   localStorage.setItem('gavan_client_events',JSON.stringify(ev));}catch(e){}};
-const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 const badge=(t,cls)=>`<span class="badge ${cls}">${t}</span>`;
 
 const board=document.getElementById('board'), empty=document.getElementById('empty'), lostWrap=document.getElementById('lostWrap'), lostList=document.getElementById('lostList');
@@ -293,14 +358,16 @@ function filtered(){
       &&(!fManager.value||d.managerId===fManager.value)
       &&(!fType.value||cl.type===fType.value)
       &&(!fStage.value||d.status===fStage.value)
-      &&(sumMode!=='action'||d.nextAction);
+      &&(sumMode!=='action'||(d.nextAction&&!TERMINAL.includes(d.status)))
+      &&(sumMode!=='ops'||OPS.includes(d.status))
+      &&(sumMode!=='done'||DONE.includes(d.status));
   });
 }
 function summary(){
   sumAll.textContent=deals.length;
-  sumAct.textContent=deals.filter(d=>d.nextAction&&d.status!=='completed'&&d.status!=='lost').length;
-  sumWork.textContent=deals.filter(d=>d.status==='in_progress').length;
-  sumDone.textContent=deals.filter(d=>d.status==='completed').length;
+  sumAct.textContent=deals.filter(d=>d.nextAction&&!TERMINAL.includes(d.status)).length;
+  sumWork.textContent=deals.filter(d=>OPS.includes(d.status)).length;
+  sumDone.textContent=deals.filter(d=>DONE.includes(d.status)).length;
   document.querySelectorAll('#sum .sum').forEach(el=>el.classList.toggle('on',sumMode===el.dataset.s||(sumMode===''&&el.dataset.s==='')));
 }
 const card=d=>{
@@ -310,9 +377,9 @@ const card=d=>{
     <div style="display:flex;justify-content:space-between"><b>#${d.id}</b><span class="c-sub">${d.createdAt}</span></div>
     <div style="font-weight:600;margin-top:2px">${esc(d.title)}</div>
     <div class="c-sub">${esc(cl.name)}</div>
-    ${objs.length?`<div class="c-sub">${esc(objs[0])}${objs.length>1?` + ${objs.length-1} объект`:''}</div>`:''}
-    <div class="amount">${money(d.amount)}${d.amountPeriod||''}</div>
-    <div class="c-sub">${d.managerId||'Менеджер не назначен'} · Заказы: ${d.orders.length}</div>
+    ${objs.length?`<div class="c-sub">${esc(objs[0])}${objs.length>1?` +${objs.length-1}`:''}</div>`:''}
+    <div class="amount">${money(d.amount)}</div>
+    <div class="c-sub">${d.managerId||'Менеджер не назначен'}</div>
     ${d.nextAction?`<div class="next">→ ${esc(d.nextAction)}<span style="float:right">${esc(naLabel(d.nextActionDate))}</span></div>`:''}
     ${d.status==='lost'?`<div class="next" style="background:#fef2f2;border-color:#fca5a5;color:#991b1b">Причина: ${REASONS[d.lostReason]||''}</div>`:''}
   </div>`;
@@ -328,6 +395,7 @@ function render(){
     board.innerHTML=COLS.map(([st,title])=>{
       const items=rows.filter(d=>d.status===st);
       return `<div class="kanban-col"><h4>${title} <span class="cnt">${items.length}</span></h4>
+        <div class="c-sub" style="margin:-4px 0 8px">${esc(RACI[st]||'')}</div>
         <div class="kanban-cards" data-s="${st}">${items.map(card).join('')||'<div class="c-sub" style="text-align:center;padding:12px 4px">Нет сделок</div>'}</div></div>`;
     }).join('');
   } else {
@@ -340,7 +408,7 @@ btnReset.onclick=resetFilters; btnReset2.onclick=resetFilters;
 document.getElementById('sum').addEventListener('click',e=>{
   const c=e.target.closest('.sum'); if(!c) return;
   sumMode=sumMode===c.dataset.s?'':c.dataset.s;
-  fStage.value = (sumMode&&sumMode!=='action')?sumMode:'';
+  fStage.value = (sumMode && !['action','ops','done'].includes(sumMode)) ? sumMode : '';
   render();
 });
 
@@ -386,10 +454,16 @@ lostList.addEventListener('click',e=>{
 
 function setStage(d,ns,who='Елена Менеджерова'){
   if(ns==='lost'){ openLost(d); return; }
-  if(ns==='completed'){ openDone(d); return; }
+  if(ns==='closing' && d.status==='execution'){ openDone(d); return; }
   d.history.push(H(now(),who,`Сделка переведена в «${STAGES[ns][0]}»`));
   clientEvent(d,`Сделка #${d.id} переведена в «${STAGES[ns][0]}»`);
-  d.status=ns; render();
+  d.status=ns;
+  if(ns==='calculation' && !d.tech) d.tech={by:null,decision:null,note:''};
+  if(ns==='planning'){ d.nextAction=d.nextAction||'Назначить бригаду'; d.nextActionDate=d.nextActionDate||'сегодня'; }
+  if(ns==='execution'){ d.nextAction=d.nextAction||'Контроль выполнения'; d.nextActionDate=d.nextActionDate||'сегодня'; }
+  if(ns==='closing'){ d.nextAction=d.nextAction||'Проверить оплату'; d.nextActionDate=d.nextActionDate||'сегодня'; if(!d.payment) d.payment={status:'pending',amount:d.amount}; }
+  if(ns==='postsale'){ d.nextAction=''; d.nextActionDate=''; if(!d.review) d.review={score:null,text:'',asked:false}; }
+  render();
   if(cur===d) openDrawer(d);
 }
 
@@ -400,10 +474,18 @@ function closeDrawer(){drawer.classList.remove('open');backdrop.classList.remove
 backdrop.onclick=closeDrawer;
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeLost();closeDone();closeNew();}});
 
+function payBadge(p){
+  if(!p) return badge('Не выставлен','gray');
+  if(p.status==='paid') return badge('Оплачено','green');
+  if(p.status==='partial') return badge('Частично','amber');
+  return badge('Ожидает оплаты','amber');
+}
+
 function openDrawer(d){
   cur=d;
   const cl=clientById(d.clientId);
-  const active=!['completed','lost'].includes(d.status);
+  const active=!TERMINAL.includes(d.status);
+  const canOrder = d.status==='approval' || d.status==='planning' || d.status==='execution';
   drawer.innerHTML=`
    <div class="card">
     <div class="drawer-head">
@@ -411,6 +493,7 @@ function openDrawer(d){
         <div style="font-size:18px;font-weight:700">Сделка #${d.id} ${badge(...STAGES[d.status])}</div>
         <div style="margin-top:4px;font-weight:600">${esc(d.title)}</div>
         <div class="c-sub">${esc(cl.name)}</div>
+        <div class="raci">${esc(RACI[d.status]||'')}</div>
       </div>
       <button class="drawer-close" onclick="closeDrawer()">✕</button>
     </div>
@@ -418,10 +501,9 @@ function openDrawer(d){
 
    <div class="card" style="margin-top:12px"><b>Основная информация</b>
      <div class="kv" style="margin-top:8px"><b>Клиент:</b> <a href="clients.html">${esc(cl.name)}</a></div>
-     ${d.applicationId?`<div class="kv"><b>Источник:</b> создана из <a href="leads.html">заявки #${d.applicationId}</a></div>`:''}
+     ${d.applicationId?`<div class="kv"><b>Источник:</b> создана из <a href="leads.html">лида #${d.applicationId}</a></div>`:''}
      <div class="kv"><b>Менеджер:</b> ${d.managerId||'—'}</div>
      <div class="kv"><b>Дата создания:</b> ${d.createdAt}</div>
-     ${!active&&d.nextAction?`<div class="kv"><b>Следующее действие:</b> ${esc(d.nextAction)} <span class="c-sub">${esc(naLabel(d.nextActionDate))}</span></div>`:''}
      ${d.status==='lost'?`<div class="kv"><b>Причина потери:</b> ${REASONS[d.lostReason]||'—'}</div>`:''}
    </div>
 
@@ -429,16 +511,47 @@ function openDrawer(d){
      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
        <input class="input" id="naText" value="${esc(d.nextAction||'')}" placeholder="Например: позвонить клиенту" style="flex:1;min-width:180px">
        <input class="input" type="date" id="naDate" value="${naISO(d.nextActionDate)}" style="width:150px">
-       <span class="btn sm primary" id="btnNaDone" title="Отметить выполненным">Выполнено</span>
+       <span class="btn sm primary" id="btnNaDone">Выполнено</span>
      </div></div>`:''}
 
-   <div class="card" style="margin-top:12px"><b>Условия сделки</b>
+   <div class="card" style="margin-top:12px"><b>КП / смета</b>
      <div class="kv" style="margin-top:8px"><b>Услуга:</b> ${esc(d.service||'—')}</div>
-     <div class="kv"><b>Периодичность:</b> ${esc(d.frequency||'—')}</div>
+     <div class="kv"><b>Состав:</b> ${esc(d.conditions||'—')}</div>
      <div class="kv"><b>Стоимость:</b> ${money(d.amount)}${d.amountPeriod||''}</div>
-     <div class="kv"><b>Дата начала:</b> ${d.startDate||'—'}</div>
-     ${d.conditions?`<div class="kv"><b>Условия:</b> ${esc(d.conditions)}</div>`:''}
+     <div class="kv"><b>Дата выезда:</b> ${d.startDate||'—'}</div>
    </div>
+
+   ${d.status==='calculation'?`<div class="card" style="margin-top:12px"><b>Расчёт / КП</b>
+     <div class="c-sub" style="margin-top:4px">Отвечает менеджер продаж · на сложных — привлекает технолога</div>
+     <label class="field" style="margin-top:10px"><span>Технолог (если нужно)</span>
+       <select class="input" id="techWho"><option value="">не требуется</option>${TECHS.map(t=>`<option ${d.tech?.by===t?'selected':''}>${t}</option>`).join('')}</select></label>
+     <label class="field"><span>Комментарий к смете</span>
+       <textarea class="input" id="techNote" rows="2" placeholder="Надбавки, трудозатраты, риски…">${esc(d.tech?.note||'')}</textarea></label>
+     <div class="act-row">
+       <span class="btn sm primary" id="btnToApproval">КП готово → Согласование</span>
+     </div>
+   </div>`:''}
+
+   ${d.status==='approval'?`<div class="card" style="margin-top:12px"><b>Согласование</b>
+     <div class="c-sub" style="margin-top:4px">Отвечает менеджер продаж — дожим, дата, предоплата, подтверждение клиента</div>
+     <div class="act-row">
+       <span class="btn sm primary" id="btnConfirmDeal">Клиент подтвердил → создать заказ</span>
+     </div>
+   </div>`:''}
+
+   ${d.status==='planning'?`<div class="card" style="margin-top:12px"><b>Планирование</b>
+     <div class="c-sub" style="margin-top:4px">Отвечает диспетчер · участвует бригадир — слот, бригада, подтверждение</div>
+     <div class="act-row">
+       <span class="btn sm primary" id="btnToExecution">Бригада назначена → Выполнение</span>
+     </div>
+   </div>`:''}
+
+   ${d.status==='execution'?`<div class="card" style="margin-top:12px"><b>Выполнение</b>
+     <div class="c-sub" style="margin-top:4px">Отвечает бригадир · участвуют клинеры — чек-лист и приёмка на заказе</div>
+     <div class="act-row">
+       <span class="btn sm primary" id="btnCloseDeal">Работы завершены → Закрытие</span>
+     </div>
+   </div>`:''}
 
    <div class="card" style="margin-top:12px"><b>Объекты</b>
      ${d.objectIds.map(oid=>{const o=objById(oid);return `<div class="mini-card"><b>${esc(o.name)}</b><div class="sub">${esc(o.area)}</div></div>`;}).join('')||'<span class="c-sub">Нет объектов</span>'}
@@ -446,11 +559,34 @@ function openDrawer(d){
 
    <div class="card" style="margin-top:12px">
      <div style="display:flex;justify-content:space-between;align-items:center"><b>Заказы</b>
-       ${active?'<span class="btn sm primary" id="dNewOrder">+ Новый заказ</span>':''}</div>
+       ${canOrder?'<span class="btn sm primary" id="dNewOrder">+ Новый заказ</span>':''}</div>
+     ${d.status==='approval'&&!d.orders.length?'<div class="c-sub" style="margin-top:6px">Создайте заказ — сделка перейдёт в «Планирование»</div>':''}
      <div style="margin-top:8px">
-       ${d.orders.slice().reverse().map(o=>`<div class="ord-row"><span><b>Заказ #${o.num}</b> · ${esc(o.service)}<div class="c-sub">${o.date}</div></span>${badge(o.status,O_ST[o.status])}</div>`).join('')||'<span class="c-sub">Заказов пока нет</span>'}
+       ${d.orders.slice().reverse().map(o=>`<div class="ord-row"><span><b>Заказ #${o.num}</b> · ${esc(o.service)}<div class="c-sub">${o.date} · <a href="orders.html">календарь</a></div></span>${badge(o.status,O_ST[o.status])}</div>`).join('')||'<span class="c-sub">Заказов пока нет</span>'}
      </div>
    </div>
+
+   ${(d.status==='closing'||d.status==='approval'||d.status==='execution')?`<div class="card" style="margin-top:12px"><b>Закрытие · оплата</b>
+     <div class="c-sub" style="margin-top:4px">Отвечает менеджер / бухгалтер</div>
+     <div class="kv" style="margin-top:8px"><b>Статус:</b> ${payBadge(d.payment)}</div>
+     <div class="kv"><b>Сумма:</b> ${money(d.payment?.amount||d.amount)}</div>
+     ${d.status==='closing'?`<div class="act-row">
+       <span class="btn sm" id="btnPay">Отметить оплату</span>
+       <span class="btn sm primary" id="btnToPostsale">К постпродаже</span>
+     </div>`:d.status==='execution'?`<div class="act-row">
+       <span class="btn sm" id="btnPay">Отметить оплату</span>
+     </div>`:''}
+   </div>`:''}
+
+   ${d.status==='postsale'?`<div class="card" style="margin-top:12px"><b>Постпродажа</b>
+     <div class="c-sub" style="margin-top:4px">Отвечает клиентский сервис</div>
+     <div class="kv" style="margin-top:8px"><b>Оценка:</b> ${d.review?.score?badge(d.review.score+' ★','green'):badge('Нет отзыва','gray')}</div>
+     <div class="kv"><b>Текст:</b> ${esc(d.review?.text||'—')}</div>
+     <div class="act-row">
+       <span class="btn sm" id="btnAskReview">Запросить отзыв</span>
+       <span class="btn sm primary" id="btnRepeat">Повторный заказ</span>
+     </div>
+   </div>`:''}
 
    <div class="card" style="margin-top:12px">
      <label class="field" style="margin-bottom:0"><span>Стадия</span>
@@ -462,30 +598,27 @@ function openDrawer(d){
    <div class="card" style="margin-top:12px"><b>Заметки</b>
      <div id="dHist">${d.history.slice().reverse().map((h,i)=>`<div class="hist-item"><span class="when">${h.at}</span><span style="flex:1"><b>${esc(h.text)}</b><div class="c-sub">${esc(h.who)}</div></span><span class="h-del" data-i="${d.history.length-1-i}" title="Удалить" style="cursor:pointer;color:var(--muted);padding:0 4px">✕</span></div>`).join('')}</div>
      <div style="display:flex;gap:8px;margin-top:10px">
-       <input class="input" id="hText" placeholder="Например: отправить КП, позвонить клиенту..." style="flex:1">
+       <input class="input" id="hText" placeholder="Например: отправить КП…" style="flex:1">
        <span class="btn sm" id="btnHist">Добавить</span>
      </div>
-     <div class="c-sub" style="margin-top:6px">Последняя запись отображается на карточке как следующее действие</div>
    </div>`;
   drawer.classList.add('open'); backdrop.classList.add('open');
 
   document.getElementById('dStage').onchange=e=>{
     const ns=e.target.value; if(ns===d.status) return;
-    if(ns==='lost'||ns==='completed'){ e.target.value=d.status; setStage(d,ns); return; }
+    if(ns==='lost'||(ns==='closing'&&d.status==='execution')){ e.target.value=d.status; setStage(d,ns); return; }
     setStage(d,ns);
   };
   document.getElementById('btnHist').onclick=()=>{
     const inp=document.getElementById('hText'), t=inp.value.trim(); if(!t) return;
     const h=H(now(),'Елена Менеджерова',t); h.note=true; d.history.push(h);
     clientEvent(d,`По сделке #${d.id}: ${t}`);
-    if(d.status!=='completed'&&d.status!=='lost'){ d.nextAction=t; d.nextActionDate='сегодня'; }
+    if(active){ d.nextAction=t; d.nextActionDate='сегодня'; }
     render(); openDrawer(d);
   };
   document.getElementById('dHist').onclick=e=>{
     const b=e.target.closest('.h-del'); if(!b) return;
     d.history.splice(+b.dataset.i,1);
-    const lastNote=[...d.history].reverse().find(h=>h.note);
-    if(lastNote&&d.status!=='completed'&&d.status!=='lost'){ d.nextAction=lastNote.text; d.nextActionDate='сегодня'; }
     render(); openDrawer(d);
   };
   document.getElementById('naText')?.addEventListener('change',e=>{d.nextAction=e.target.value.trim();render();});
@@ -493,23 +626,74 @@ function openDrawer(d){
   document.getElementById('btnNaDone')?.addEventListener('click',()=>{
     if(!d.nextAction) return;
     d.history.push(H(now(),'Елена Менеджерова',`Выполнено: ${d.nextAction}`));
-    clientEvent(d,`По сделке #${d.id} выполнено: ${d.nextAction}`);
     d.nextAction=''; d.nextActionDate='';
-    render(); openDrawer(d); toast('Действие выполнено — запись добавлена в историю');
+    render(); openDrawer(d); toast('Действие выполнено');
   });
-  document.getElementById('dDone')?.addEventListener('click',()=>openDone(d));
-  document.getElementById('dLose')?.addEventListener('click',()=>openLost(d));
-  document.getElementById('dNewOrder')?.addEventListener('click',()=>{
+
+  const createOrderFromDeal=()=>{
     const num=ordersSeq++;
     d.orders.push({num,date:now().slice(0,10),service:d.service||'Уборка',status:'Запланирован'});
-    d.history.push(H(now(),'Елена Менеджерова',`Создан заказ #${num}`));
+    d.history.push(H(now(),'Елена Менеджерова',`Создан заказ #${num} · планирование (диспетчер)`));
     clientEvent(d,`Создан заказ #${num} по сделке #${d.id}`);
-    toast(`Заказ #${num} создан и привязан к сделке`);
+    if(d.status==='approval'){
+      d.status='planning';
+      d.history.push(H(now(),'Система','Сделка в планировании'));
+    }
+    d.nextAction='Назначить бригаду'; d.nextActionDate='сегодня';
+    if(!d.payment) d.payment={status:'pending',amount:d.amount};
+    toast(`Заказ #${num} создан`);
     render(); openDrawer(d);
+  };
+  document.getElementById('btnToApproval')?.addEventListener('click',()=>{
+    const who=document.getElementById('techWho')?.value||null;
+    const note=document.getElementById('techNote')?.value.trim()||'';
+    d.tech={by:who,decision:who?'ok':'skipped',note};
+    d.history.push(H(now(),who||'Елена Менеджерова', who?`КП с участием технолога (${who})`:'КП готово'));
+    d.nextAction='Согласовать с клиентом'; d.nextActionDate='сегодня';
+    setStage(d,'approval',who||'Елена Менеджерова');
+  });
+  document.getElementById('dNewOrder')?.addEventListener('click',createOrderFromDeal);
+  document.getElementById('btnConfirmDeal')?.addEventListener('click',createOrderFromDeal);
+  document.getElementById('btnToExecution')?.addEventListener('click',()=>{
+    d.nextAction='Контроль выполнения на объекте'; d.nextActionDate='сегодня';
+    setStage(d,'execution','Диспетчер');
+  });
+  document.getElementById('btnCloseDeal')?.addEventListener('click',()=>openDone(d));
+  document.getElementById('btnToPostsale')?.addEventListener('click',()=>{
+    d.nextAction=''; d.nextActionDate='';
+    if(!d.review) d.review={score:null,text:'',asked:false};
+    setStage(d,'postsale','Клиентский сервис');
+  });
+
+  document.getElementById('btnPay')?.addEventListener('click',()=>{
+    d.payment={status:'paid',amount:d.amount};
+    d.history.push(H(now(),'Бухгалтер','Оплата получена'));
+    toast('Оплата зафиксирована');
+    render(); openDrawer(d);
+  });
+  document.getElementById('btnAskReview')?.addEventListener('click',()=>{
+    d.review={score:5,text:'Отличная уборка, рекомендую',asked:true};
+    d.history.push(H(now(),'Клиентский сервис','Получен отзыв 5★'));
+    toast('Отзыв добавлен');
+    openDrawer(d);
+  });
+  document.getElementById('btnRepeat')?.addEventListener('click',()=>{
+    const id=Math.max(...deals.map(x=>x.id))+1;
+    const nd={
+      id, title:`Повтор · ${d.title}`, clientId:d.clientId, managerId:d.managerId,
+      objectIds:[...d.objectIds], status:'calculation', service:d.service, amount:d.amount,
+      amountPeriod:'', frequency:'разово', conditions:d.conditions||'', createdAt:now().slice(0,10),
+      orders:[], payment:null, review:null, tech:null, visit:null,
+      nextAction:'Связаться по повторному заказу', nextActionDate:'сегодня',
+      history:[H(now(),'Клиентский сервис',`Повторная сделка из #${d.id}`)],
+    };
+    deals.unshift(nd);
+    toast(`Создана повторная сделка #${id}`);
+    render(); openDrawer(nd);
   });
 }
 
-/* Lost / Done modals */
+/* Lost / Done */
 const modalLost=document.getElementById('modalLost'), modalDone=document.getElementById('modalDone');
 let lostTarget=null, doneTarget=null;
 function openLost(d){lostTarget=d;lostReason.value='';eReason.style.display='none';modalLost.style.display='flex';}
@@ -520,28 +704,28 @@ btnLostSave.onclick=()=>{
   const d=lostTarget;
   d.status='lost'; d.lostReason=r;
   d.history.push(H(now(),'Елена Менеджерова',`Сделка потеряна. Причина: ${REASONS[r]}`));
-  clientEvent(d,`Сделка #${d.id} потеряна. Причина: ${REASONS[r]}`);
   closeLost(); render(); if(cur===d)openDrawer(d);
 };
-function openDone(d){doneTarget=d;document.getElementById('doneText').textContent=`Сделка #${d.id} · ${clientById(d.clientId).name} · ${money(d.amount)}${d.amountPeriod||''}. Связанные заказы сохранятся.`;modalDone.style.display='flex';}
+function openDone(d){doneTarget=d;document.getElementById('doneText').textContent=`Сделка #${d.id} · ${clientById(d.clientId).name} · ${money(d.amount)}. Заказы сохранятся. Можно запросить отзыв.`;modalDone.style.display='flex';}
 function closeDone(){modalDone.style.display='none';doneTarget=null;}
 modalDone.addEventListener('click',e=>{if(e.target===modalDone)closeDone();});
 btnDoneOk.onclick=()=>{
   const d=doneTarget;
-  d.status='completed';
-  d.history.push(H(now(),'Елена Менеджерова','Сделка завершена'));
-  clientEvent(d,`Сделка #${d.id} завершена`);
+  d.status='closing';
+  d.nextAction='Проверить оплату'; d.nextActionDate='сегодня';
+  if(!d.payment) d.payment={status:'pending',amount:d.amount};
+  d.history.push(H(now(),'Елена Менеджерова','Работы завершены → закрытие'));
   closeDone(); render(); if(cur===d)openDrawer(d);
-  toast(`Сделка #${d.id} завершена`);
+  toast(`Сделка #${d.id} на закрытии`);
 };
 
-/* New deal modal */
+/* New deal */
 const modalNew=document.getElementById('modalNew');
 function openNew(pref){
   document.getElementById('nClient').innerHTML='<option value="">— выберите —</option>'+CLIENTS.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
   document.getElementById('nObjects').innerHTML=OBJECTS.map(o=>`<label style="display:flex;gap:8px;padding:3px 0"><input type="checkbox" value="${o.id}"> ${esc(o.name)} <span class="c-sub">${esc(o.area)}</span></label>`).join('');
   ['nClient','nTitle','nService','nAmount','nStart','nFreq','nManager','nCond'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('nPeriod').value='/ месяц';
+  document.getElementById('nPeriod').value='';
   document.getElementById('eClient').style.display='none';
   if(pref&&pref.clientId) document.getElementById('nClient').value=pref.clientId;
   if(pref&&pref.title) document.getElementById('nTitle').value=pref.title;
@@ -559,14 +743,16 @@ document.getElementById('btnCreate').onclick=()=>{
     clientId:cid, applicationId:window._fromApp||undefined,
     managerId:document.getElementById('nManager').value,
     objectIds:[...document.querySelectorAll('#nObjects input:checked')].map(i=>i.value),
-    status:'new', service:document.getElementById('nService').value.trim(),
+    status:'calculation', service:document.getElementById('nService').value.trim(),
     amount:+document.getElementById('nAmount').value||0,
     amountPeriod:document.getElementById('nPeriod').value,
-    startDate:document.getElementById('nStart').value, frequency:document.getElementById('nFreq').value.trim(),
+    startDate:document.getElementById('nStart').value, frequency:document.getElementById('nFreq').value.trim()||'разово',
     conditions:document.getElementById('nCond').value.trim(), createdAt:now().slice(0,10), orders:[],
-    history:[H(now(),'Елена Менеджерова', window._fromApp?`Сделка создана из заявки #${window._fromApp}`:'Сделка создана вручную')]};
+    payment:null, review:null, tech:null, visit:null,
+    nextAction:'Собрать вводные / перейти к расчёту', nextActionDate:'сегодня',
+    history:[H(now(),'Елена Менеджерова', window._fromApp?`Сделка создана из лида #${window._fromApp}`:'Сделка создана вручную')]};
   deals.unshift(d);
-  clientEvent(d,`Создана сделка #${id}${window._fromApp?` из заявки #${window._fromApp}`:''}`);
+  clientEvent(d,`Создана сделка #${id}${window._fromApp?` из лида #${window._fromApp}`:''}`);
   window._fromApp=null;
   closeNew(); render(); toast(`Сделка #${id} создана`);
 };
@@ -578,14 +764,13 @@ function toast(msg,err){
   setTimeout(()=>t.remove(),2600);
 }
 
-/* Демо-путь: заявка → сделка (leads.html «Создать сделку» → deals.html?from=1048) */
 const fromApp=new URLSearchParams(location.search).get('from');
 if(fromApp){
-  const appMap={'1048':'cl5','1049':'cl1','1050':'cl2','1051':'cl3','1052':'cl4','1047':'cl6','1046':'cl7','1045':'cl8'};
+  const appMap={'1048':'cl5','1049':'cl1','1050':'cl2','1051':'cl3','1052':'cl4','1047':'cl6','1046':'cl7','1045':'cl8','1044':'cl9','1043':'cl1','1042':'cl10','1041':'cl11'};
   if(!deals.some(d=>d.applicationId===+fromApp)){
     window._fromApp=+fromApp;
-    openNew({clientId:appMap[fromApp],title:`Сделка из заявки #${fromApp}`});
-    toast(`Создаём сделку из заявки #${fromApp}`);
+    openNew({clientId:appMap[fromApp],title:`Сделка из лида #${fromApp}`});
+    toast(`Создаём сделку из лида #${fromApp}`);
   }
 }
 render();
