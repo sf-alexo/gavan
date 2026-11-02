@@ -14,6 +14,8 @@
   .kanban-card { cursor: grab; }
   .kanban-card:active { cursor: grabbing; }
   .kanban-card.dragging { opacity: .5; }
+  .kanban-card .card-actions { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .kanban-card .card-actions .btn { cursor: pointer; }
   .err { color: var(--danger); font-size: 12px; margin-top: 4px; display: none; }
   .col-new h4 { color: #1e40af; }
   .col-proc h4 { color: #92400e; }
@@ -352,7 +354,7 @@ const COLS = [
 const RACI = {
   RECEIVED:'Цель: назначить ответственного, подтвердить источник, отсеять мусор',
   QUALIFICATION:'Цель: понять, подходит ли клиент, и собрать данные для точной сметы.',
-  QUALIFIED:'Готов к сделке → Расчёт / КП',
+  QUALIFIED:'Готов к сделке → Согласование / КП',
   LOST:'Вежливый отказ или передача партнёру',
 };
 const REASONS = { POLITE:'Вежливый отказ', PARTNER:'Передача партнёру', PRICE:'Цена', COMPETITOR:'Клиент выбрал другую компанию', REFUSED:'Клиент отказался', NO_CONTACT:'Не удалось связаться', OBJECT:'Объект не подходит / вне зоны', TIMING:'Сроки', OTHER:'Другое' };
@@ -632,6 +634,9 @@ const card = a => {
     <div class="c-sub" style="margin-top:6px">${esc(cl.name)} · ${badge(a.source,'gray')}</div>
     <div class="c-sub">${a.objectIds.length} объект(а) · М: ${a.managerId?esc(a.managerId.split(' ')[0]):'—'}</div>
     <div class="c-sub">${a.createdAt}</div>
+    ${a.status==='QUALIFIED'?`<div class="card-actions">
+      <span class="btn sm primary btn-send-kp" data-id="${a.id}">Отправить КП</span>
+    </div>`:''}
   </div>`;
 };
 function render(){
@@ -703,8 +708,19 @@ board.addEventListener('drop',e=>{
   if(cur===a) openDrawer(a);
   suppressUntil=Date.now()+150;
 });
+function sendKp(a){
+  pushHist(a,'КП','КП отправлено клиенту');
+  toast(`КП по лиду ${a.id} отправлено`);
+  if(cur===a) openDrawer(a); else render();
+}
 board.addEventListener('click',e=>{
   if(Date.now()<suppressUntil) return;
+  const kp=e.target.closest('.btn-send-kp');
+  if(kp){
+    e.preventDefault(); e.stopPropagation();
+    const a=applications.find(x=>x.id===kp.dataset.id); if(a) sendKp(a);
+    return;
+  }
   const c=e.target.closest('.kanban-card'); if(!c) return;
   openDrawer(applications.find(a=>a.id===c.dataset.id));
 });
@@ -863,7 +879,10 @@ function openDrawer(a){
        <select class="input" id="dStatus">
          ${Object.entries(STATUSES).map(([k,[t]])=>`<option value="${k}" ${a.status===k?'selected':''}>${t}</option>`).join('')}
        </select></label>
-     ${a.status==='QUALIFIED'?`<a class="btn primary" href="deals.html?from=${a.id.slice(1)}" style="margin-top:10px">Создать сделку →</a>`:''}
+     ${a.status==='QUALIFIED'?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+       <span class="btn primary" id="btnSendKp">Отправить КП</span>
+       <a class="btn" href="deals.html?from=${a.id.slice(1)}">Создать сделку →</a>
+     </div>`:''}
    </div>
 
    <div class="card" style="margin-top:12px"><b>Заметки</b>
@@ -918,6 +937,7 @@ function openDrawer(a){
     a.status='QUALIFIED';
     render(); openDrawer(a); toast(`Лид ${a.id} квалифицирован`);
   });
+  document.getElementById('btnSendKp')?.addEventListener('click',()=>sendKp(a));
   document.getElementById('dManager').onchange=e=>{
     const v=e.target.value||null;
     if(v===a.managerId) return;
