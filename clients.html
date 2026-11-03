@@ -185,7 +185,7 @@ function detail(c){
   if (c.detail) return c.detail;
   return {
     objects: Array.from({length:c.objects},(_,i)=>({name:`Объект ${i+1} · ${c.name}`,type:OBJ_TYPES[i%4],addr:'Алматы',area:'—',schedule:'—',status:'Активен'})),
-    deals: Array.from({length:c.deals},(_,i)=>({name:`${SERVICES[i%4]} · ${c.name}`,stage:['Согласование','Планирование','Выполнение','Закрытие','Постпродажа'][i%5],next:['Ждём ответ по КП','Назначить бригаду','Контроль на объекте','Проверить оплату','Запросить отзыв'][i%5],last:c.last})),
+    deals: Array.from({length:c.deals},(_,i)=>({name:`${SERVICES[i%4]} · ${c.name}`,stage:['Планирование','Выполнение','Закрытие','Постпродажа'][i%4],next:['Назначить бригаду','Контроль на объекте','Проверить оплату','Запросить отзыв'][i%4],last:c.last})),
     orders: Array.from({length:c.orders},(_,i)=>({num:'#'+(1100-i),service:SERVICES[i%4],obj:`Объект 1 · ${c.name}`,date:`0${(i%9)+1}.09.2026`,status:O_ST[i%5]})),
     history: [[c.last,'Обновлены данные клиента'],['','Клиент добавлен в базу']],
   };

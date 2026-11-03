@@ -10,8 +10,8 @@
 <div class="page" style="max-width:1180px">
   <h1>«Чистая Гавань» — разовый заказ</h1>
   <p style="color:var(--muted); max-width:760px">
-    Лиды и сделки раздельно. Этапы по RACI: приём → квалификация → согласование →
-    планирование → выполнение → закрытие → постпродажа.
+    Лиды и сделки раздельно. Этапы по RACI: новый → квалификация → расчёт КП →
+    технолог → замер → подтверждение заказа → планирование → выполнение → закрытие → постпродажа.
   </p>
 
   <div class="card" style="margin-bottom:24px; overflow:auto">
@@ -19,13 +19,17 @@
     <table class="table" style="margin:0; min-width:520px">
       <thead><tr><th>Этап</th><th>Где</th><th>Отвечает</th><th>Участвует</th></tr></thead>
       <tbody>
-        <tr><td>Приём лида</td><td><a href="leads.html">Лиды</a></td><td>Диспетчер</td><td>—</td></tr>
+        <tr><td>Новый</td><td><a href="leads.html">Лиды</a></td><td>Диспетчер</td><td>—</td></tr>
         <tr><td>Квалификация</td><td><a href="leads.html">Лиды</a></td><td>Менеджер продаж</td><td>—</td></tr>
-        <tr><td>Согласование</td><td><a href="deals.html">Сделки</a></td><td>Менеджер продаж</td><td>—</td></tr>
+        <tr><td>Расчёт стоимости и КП</td><td><a href="leads.html">Лиды</a></td><td>Менеджер продаж</td><td>—</td></tr>
+        <tr><td>Согласование с технологом</td><td><a href="leads.html">Лиды</a></td><td>Технолог / бригадир</td><td>Менеджер продаж</td></tr>
+        <tr><td>Выезд на замер</td><td><a href="leads.html">Лиды</a></td><td>Технолог / бригадир</td><td>Менеджер продаж</td></tr>
+        <tr><td>Согласование и подтверждение заказа</td><td><a href="leads.html">Лиды</a></td><td>Менеджер продаж</td><td>—</td></tr>
         <tr><td>Планирование</td><td><a href="deals.html">Сделки</a> + <a href="orders.html">заказ</a></td><td>Диспетчер</td><td>Бригадир</td></tr>
         <tr><td>Выполнение</td><td><a href="deals.html">Сделки</a> + <a href="order-work.html">заказ</a></td><td>Бригадир</td><td>Клинеры</td></tr>
-        <tr><td>Закрытие</td><td><a href="deals.html">Сделки</a></td><td>Менеджер / бухгалтер</td><td>—</td></tr>
-        <tr><td>Постпродажа</td><td><a href="deals.html">Сделки</a></td><td>Клиентский сервис</td><td>—</td></tr>
+        <tr><td>Закрытие (финансы и документы)</td><td><a href="deals.html">Сделки</a></td><td>Менеджер / бухгалтер</td><td>—</td></tr>
+        <tr><td>Постпродажа и отзывы</td><td><a href="deals.html">Сделки</a></td><td>Менеджер / клиентский сервис</td><td>—</td></tr>
+        <tr><td>Архив</td><td><a href="deals.html">Сделки</a></td><td>—</td><td>—</td></tr>
       </tbody>
     </table>
   </div>
@@ -34,14 +38,8 @@
   <div class="flow">
     <a class="step" href="leads.html">
       <div class="n">ЛИДЫ</div>
-      <div class="t">Приём → Квалификация</div>
-      <div class="d">Диспетчер → менеджер продаж</div>
-    </a>
-    <span class="arrow">→</span>
-    <a class="step" href="deals.html">
-      <div class="n">СДЕЛКИ</div>
-      <div class="t">Согласование</div>
-      <div class="d">Менеджер продаж · КП</div>
+      <div class="t">Новый → … → Подтверждение</div>
+      <div class="d">До твёрдого «да» клиента</div>
     </a>
     <span class="arrow">→</span>
     <a class="step" href="deals.html">
@@ -59,13 +57,19 @@
     <a class="step" href="deals.html">
       <div class="n">СДЕЛКИ</div>
       <div class="t">Закрытие</div>
-      <div class="d">Менеджер / бухгалтер</div>
+      <div class="d">Счёт · оплата · документы · сверка</div>
     </a>
     <span class="arrow">→</span>
     <a class="step" href="deals.html">
       <div class="n">СДЕЛКИ</div>
       <div class="t">Постпродажа</div>
-      <div class="d">Клиентский сервис</div>
+      <div class="d">Отзыв · негатив · абонемент · LTV</div>
+    </a>
+    <span class="arrow">→</span>
+    <a class="step" href="deals.html">
+      <div class="n">СДЕЛКИ</div>
+      <div class="t">Архив</div>
+      <div class="d">Завершённые карточки</div>
     </a>
   </div>
 
